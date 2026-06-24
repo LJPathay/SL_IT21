@@ -1,3 +1,57 @@
+@php
+    $segment = request()->segment(1);
+    
+    // Default values if not overridden by the view
+    if ($segment === 'admin') {
+        $user_role = 'Administrator';
+        $user_name = 'Admin User';
+        $user_initial = 'A';
+    } elseif ($segment === 'instructor') {
+        $user_role = 'Instructor';
+        $user_name = 'Instructor User';
+        $user_initial = 'I';
+    } else {
+        $user_role = 'Student';
+        $user_name = 'Student User';
+        $user_initial = 'S';
+    }
+    
+    // Automatically set header title based on current segment/action if not overridden
+    $subSegment = request()->segment(2);
+    if ($segment === 'admin') {
+        $header_title = match($subSegment) {
+            'dashboard' => 'Administrator Dashboard',
+            'modules' => 'Manage Modules',
+            'quizzes' => 'Quizzes & Assessments',
+            'users' => 'User Management',
+            'phishing' => 'Phishing Simulation Campaigns',
+            'reports' => 'System Reports',
+            default => 'Admin Control Panel'
+        };
+    } elseif ($segment === 'instructor') {
+        $header_title = match($subSegment) {
+            'dashboard' => 'Instructor Overview',
+            'students' => 'Student Progress Tracking',
+            'assessments' => 'Assessment Performance',
+            default => 'Instructor Portal'
+        };
+    } else { // student
+        $header_title = match($subSegment) {
+            'dashboard' => 'My Learning Dashboard',
+            'courses' => 'My Enrolled Courses',
+            'inbox' => 'Phishing Inbox Simulator',
+            'leaderboard' => 'Leaderboard & Rankings',
+            'quizzes' => 'Quizzes & Exams',
+            'certificates' => 'My Achievements',
+            default => 'Student Dashboard'
+        };
+    }
+
+    $initial = trim(View::yieldContent('user_initial')) ?: $user_initial;
+    $name = trim(View::yieldContent('user_name')) ?: $user_name;
+    $role = trim(View::yieldContent('user_role')) ?: $user_role;
+    $title = trim(View::yieldContent('header_title')) ?: $header_title;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50">
 <head>
@@ -18,7 +72,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar Component -->
-    <x-sidebar :initial="$user_initial ?? 'U'" :name="$user_name ?? 'User'" :role="$user_role ?? 'Role'">
+    <x-sidebar :initial="$initial" :name="$name" :role="$role">
         @yield('sidebar')
     </x-sidebar>
 
@@ -26,7 +80,7 @@
     <div class="flex-1 flex flex-col overflow-hidden w-full">
         
         <!-- Header Component -->
-        <x-header :title="$header_title ?? 'Dashboard'" />
+        <x-header :title="$title" />
 
         <!-- Main Scrollable Content -->
         <main class="flex-1 overflow-auto bg-slate-50 p-4 md:p-6 lg:p-8">
