@@ -13,17 +13,16 @@
 
     <!-- Certificates Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        <!-- Earned Certificate: SQL Injection -->
+        @forelse($certificates as $cert)
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
             <div class="p-6 flex-1 space-y-4">
                 <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg border border-blue-100">
                     🏆
                 </div>
                 <div>
-                    <h4 class="font-bold text-slate-900 text-lg">SQL Injection Prevention</h4>
-                    <p class="text-xs text-slate-450 mt-1">Credential ID: <span class="font-mono text-slate-700">SL-10384-SQL</span></p>
-                    <p class="text-xs text-slate-450">Issue Date: June 22, 2026</p>
+                    <h4 class="font-bold text-slate-900 text-lg">{{ $cert->module->title ?? 'Certificate' }}</h4>
+                    <p class="text-xs text-slate-450 mt-1">Credential ID: <span class="font-mono text-slate-700">{{ $cert->credential_id ?? 'N/A' }}</span></p>
+                    <p class="text-xs text-slate-450">Issue Date: {{ $cert->issued_at ? $cert->issued_at->format('M d, Y') : 'N/A' }}</p>
                 </div>
                 
                 <div class="pt-2">
@@ -39,39 +38,15 @@
                 </button>
             </div>
         </div>
-
-        <!-- Locked Certificate: Phishing Detection -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col opacity-65 bg-slate-50/30">
-            <div class="p-6 flex-1 space-y-4">
-                <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-lg border border-slate-200">
-                    🔒
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-400 text-lg">Phishing Detection</h4>
-                    <p class="text-xs text-slate-400 mt-1">Complete Phishing Detection Quiz to unlock.</p>
-                </div>
-            </div>
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 text-center text-xs font-semibold text-slate-400">
-                Course Incomplete
+        @empty
+        <div class="col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
+            <div class="flex flex-col items-center gap-3">
+                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"></path></svg>
+                <p class="font-medium">No certificates earned yet</p>
+                <p class="text-sm">Complete course quizzes to earn certificates.</p>
             </div>
         </div>
-
-        <!-- Locked Certificate: Password Security -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col opacity-65 bg-slate-50/30">
-            <div class="p-6 flex-1 space-y-4">
-                <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-lg border border-slate-200">
-                    🔒
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-400 text-lg">Password Security</h4>
-                    <p class="text-xs text-slate-400 mt-1">Complete Password Security Quiz to unlock.</p>
-                </div>
-            </div>
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 text-center text-xs font-semibold text-slate-400">
-                Course Incomplete
-            </div>
-        </div>
-
+        @endforelse
     </div>
 
     <!-- CERTIFICATE PRINT MODAL DIALOG -->

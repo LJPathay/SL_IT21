@@ -14,6 +14,7 @@ class Certificate extends Model
         'course_id',
         'module_id',
         'certificate_number',
+        'credential_id',
         'title',
         'issued_at',
         'expires_at',

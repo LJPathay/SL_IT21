@@ -65,16 +65,16 @@
             
             <div class="grid grid-cols-3 gap-4 text-center">
                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Page Views</div>
-                    <div class="text-lg font-bold text-slate-900 mt-0.5">8,450</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Total Users</div>
+                    <div class="text-lg font-bold text-slate-900 mt-0.5">{{ $totalUsers }}</div>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Total Certs</div>
-                    <div class="text-lg font-bold text-slate-900 mt-0.5">142</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Total Courses</div>
+                    <div class="text-lg font-bold text-slate-900 mt-0.5">{{ $totalCourses }}</div>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">Active Users</div>
-                    <div class="text-lg font-bold text-slate-900 mt-0.5">1,124</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Completion Rate</div>
+                    <div class="text-lg font-bold text-slate-900 mt-0.5">{{ $completionRate }}%</div>
                 </div>
             </div>
         </div>
@@ -142,29 +142,25 @@
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
             <h3 class="font-bold text-slate-800 text-base">Security Audit Logs</h3>
         </div>
+        @forelse($recentAuditLogs as $log)
         <div class="divide-y divide-slate-100 text-sm">
             <div class="p-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    <span class="text-slate-700">Administrator <span class="font-semibold">Admin User</span> added question to SQLi Quiz.</span>
+                    <span class="text-slate-700">{{ $log->description ?? 'Audit log entry' }}</span>
                 </div>
-                <span class="text-xs text-slate-450">June 24, 2026 14:15</span>
-            </div>
-            <div class="p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                    <span class="text-slate-700">User role upgraded for <span class="font-semibold">Michael Johnson</span>.</span>
-                </div>
-                <span class="text-xs text-slate-455">June 24, 2026 11:32</span>
-            </div>
-            <div class="p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                    <span class="text-slate-700">Suspended account <span class="font-semibold">Michael Johnson</span> due to test misconduct.</span>
-                </div>
-                <span class="text-xs text-slate-455">June 23, 2026 16:50</span>
+                <span class="text-xs text-slate-450">{{ $log->created_at ? $log->created_at->format('M d, Y H:i') : 'N/A' }}</span>
             </div>
         </div>
+        @empty
+        <div class="p-12 text-center text-slate-500">
+            <div class="flex flex-col items-center gap-3">
+                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="font-medium">No audit logs found</p>
+                <p class="text-sm">Audit logs will appear here as users interact with the system.</p>
+            </div>
+        </div>
+        @endforelse
     </div>
 
 </div>

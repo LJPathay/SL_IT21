@@ -22,94 +22,40 @@
         <h3 class="font-bold text-slate-800 text-lg">In Progress</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Phishing -->
+            @forelse($enrolledCourses as $course)
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                 <div class="p-6 flex-1 space-y-4">
                     <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">Social Engineering</span>
-                        <span class="text-xs text-slate-500 font-medium">2 of 5 lessons completed</span>
+                        <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg border border-blue-100">{{ $course->category ?? 'General' }}</span>
+                        <span class="text-xs text-slate-500 font-medium">Enrolled</span>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-900 text-lg">Phishing Detection Awareness</h4>
-                        <p class="text-slate-500 text-sm mt-1">Identify deceptive URLs, malicious attachments, and social hacks.</p>
+                        <h4 class="font-bold text-slate-900 text-lg">{{ $course->title }}</h4>
+                        <p class="text-slate-500 text-sm mt-1">{{ $course->description ?? 'No description available' }}</p>
                     </div>
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs font-semibold text-slate-600">
                             <span>Progress</span>
-                            <span>40%</span>
+                            <span>{{ $course->pivot->progress_percentage ?? 0 }}%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full rounded-full" style="width: 40%"></div>
+                            <div class="bg-blue-600 h-full rounded-full" style="width: {{ $course->pivot->progress_percentage ?? 0 }}%"></div>
                         </div>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                    <a href="{{ url('/learn/2') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">Resume Course</a>
+                    <a href="{{ url('/modules/' . $course->id) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">Continue Learning</a>
                 </div>
             </div>
-
-            <!-- Password -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                <div class="p-6 flex-1 space-y-4">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">Access Management</span>
-                        <span class="text-xs text-slate-500 font-medium">0 of 4 lessons completed</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900 text-lg">Password Security Assessment</h4>
-                        <p class="text-slate-500 text-sm mt-1">Learn to generate complex, robust passwords and understand 2FA configurations.</p>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-semibold text-slate-600">
-                            <span>Progress</span>
-                            <span>0%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                    <a href="{{ url('/learn/3') }}" class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 rounded-lg font-bold text-sm">Start Course</a>
+            @empty
+            <div class="col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
+                <div class="flex flex-col items-center gap-3">
+                    <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <p class="font-medium">No courses enrolled</p>
+                    <p class="text-sm">Browse the catalog to start your learning journey.</p>
                 </div>
             </div>
-        </div>
-
-        <h3 class="font-bold text-slate-800 text-lg pt-4">Completed Courses</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- SQLi -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col opacity-90">
-                <div class="p-6 flex-1 space-y-4">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg border border-green-100">Web Security</span>
-                        <span class="text-xs text-green-700 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            Finished
-                        </span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900 text-lg">SQL Injection Prevention</h4>
-                        <p class="text-slate-500 text-sm mt-1">Defend applications against injection queries using prepared statement formats.</p>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-semibold text-slate-650">
-                            <span>Progress</span>
-                            <span>100%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-green-500 h-full rounded-full" style="width: 100%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                    <a href="{{ url('/student/certificates') }}" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"></path></svg>
-                        View Certificate
-                    </a>
-                    <a href="{{ url('/learn/1') }}" class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 rounded-lg font-bold text-sm">Review Module</a>
-                </div>
-            </div>
+            @endforelse
         </div>
 
     </div>

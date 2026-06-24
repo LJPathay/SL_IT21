@@ -67,54 +67,29 @@
                 <h3 class="font-bold text-slate-800 text-base">Top User Rankings</h3>
             </div>
             <div class="divide-y divide-slate-100">
-                <!-- Rank 4 -->
-                <div class="p-4 flex items-center justify-between hover:bg-slate-50/20 transition-colors">
+                @forelse($leaderboard as $index => $user)
+                @if($index >= 3)
+                <div class="p-4 flex items-center justify-between hover:bg-slate-50/20 transition-colors {{ $user->id === Auth::id() ? 'bg-blue-50/40 border-l-4 border-blue-500' : '' }}">
                     <div class="flex items-center gap-3">
-                        <span class="w-6 text-slate-400 font-bold text-center">4</span>
-                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold">CP</div>
+                        <span class="w-6 {{ $user->id === Auth::id() ? 'text-blue-600 font-black' : 'text-slate-400' }} font-bold text-center">{{ $index + 1 }}</span>
+                        <div class="w-8 h-8 rounded-full {{ $user->id === Auth::id() ? 'bg-blue-600 text-white' : 'bg-slate-100' }} flex items-center justify-center text-xs font-bold">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
                         <div>
-                            <div class="text-sm font-bold text-slate-900">Charlie Peterson</div>
-                            <div class="text-[10px] text-slate-450">Marketing</div>
+                            <div class="text-sm {{ $user->id === Auth::id() ? 'font-extrabold text-blue-900' : 'font-bold text-slate-900' }}">{{ $user->name }}{{ $user->id === Auth::id() ? ' (You)' : '' }}</div>
+                            <div class="text-[10px] {{ $user->id === Auth::id() ? 'text-blue-700/80' : 'text-slate-450' }}">{{ $user->department ?? 'Student' }}</div>
                         </div>
                     </div>
-                    <span class="text-sm font-bold text-blue-600">890 pts</span>
+                    <span class="text-sm font-bold {{ $user->id === Auth::id() ? 'text-blue-700' : 'text-blue-600' }}">{{ $user->certificates_count ?? 0 }} certs</span>
                 </div>
-
-                <!-- Rank 5 -->
-                <div class="p-4 flex items-center justify-between hover:bg-slate-50/20 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="w-6 text-slate-400 font-bold text-center">5</span>
-                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold">DM</div>
-                        <div>
-                            <div class="text-sm font-bold text-slate-900">David Miller</div>
-                            <div class="text-[10px] text-slate-450">IT Security</div>
-                        </div>
-                    </div>
-                    <span class="text-sm font-bold text-blue-600">875 pts</span>
-                </div>
-
-                <!-- Spacer indicator -->
-                <div class="p-2 bg-slate-50/50 text-slate-400 text-center text-xs font-bold tracking-widest select-none border-y border-slate-100">
-                    •••
-                </div>
-
-                <!-- Student's own Rank (#14) -->
-                <div class="p-4 flex items-center justify-between bg-blue-50/40 border-l-4 border-blue-500 hover:bg-blue-50/60 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="w-6 text-blue-600 font-black text-center">14</span>
-                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">LP</div>
-                        <div>
-                            <div class="text-sm font-extrabold text-blue-900">Lebron James Pathay (You)</div>
-                            <div class="text-[10px] text-blue-700/80">CS Department</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-black text-blue-700">850 pts</span>
-                        <span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100 flex items-center gap-0.5">
-                            ▲ 2
-                        </span>
+                @endif
+                @empty
+                <div class="p-12 text-center text-slate-500">
+                    <div class="flex flex-col items-center gap-3">
+                        <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <p class="font-medium">No leaderboard data</p>
+                        <p class="text-sm">Complete courses to appear on the leaderboard.</p>
                     </div>
                 </div>
+                @endforelse
             </div>
         </div>
 

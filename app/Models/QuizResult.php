@@ -18,6 +18,7 @@ class QuizResult extends Model
         'questions_answered',
         'correct_answers',
         'score_percentage',
+        'score',
         'status',
         'started_at',
         'completed_at',

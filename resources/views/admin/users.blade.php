@@ -56,147 +56,47 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    
-                    <!-- User 1 -->
+                    @forelse($users as $user)
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 font-bold text-sm flex items-center justify-center">LP</div>
-                                <div class="font-bold text-slate-900">Lebron James Pathay</div>
+                                <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 font-bold text-sm flex items-center justify-center">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                                <div class="font-bold text-slate-900">{{ $user->name }}</div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-slate-600">lebron@example.com</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $user->email }}</td>
                         <td class="px-6 py-4">
-                            <select onchange="alert('Role updated to ' + this.value)" class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold focus:ring-1 focus:ring-blue-500">
-                                <option value="Student" selected>Student</option>
-                                <option value="Instructor">Instructor</option>
-                                <option value="Administrator">Admin</option>
-                            </select>
+                            <span class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold">{{ ucfirst($user->role) }}</span>
                         </td>
                         <td class="px-6 py-4">
+                            @if($user->is_active ?? true)
                             <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
                                 Active
                             </span>
-                        </td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">June 20, 2026</td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="alert('Audit logs for Lebron James Pathay will be loaded.')" class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
-                        </td>
-                    </tr>
-
-                    <!-- User 2 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center">IU</div>
-                                <div class="font-bold text-slate-900">Instructor User</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-600">instructor@example.com</td>
-                        <td class="px-6 py-4">
-                            <select onchange="alert('Role updated to ' + this.value)" class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold focus:ring-1 focus:ring-blue-500">
-                                <option value="Student">Student</option>
-                                <option value="Instructor" selected>Instructor</option>
-                                <option value="Administrator">Admin</option>
-                            </select>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">June 18, 2026</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
-                        </td>
-                    </tr>
-
-                    <!-- User 3 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-red-100 text-red-600 font-bold text-sm flex items-center justify-center">AU</div>
-                                <div class="font-bold text-slate-900">Admin User</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-600">admin@example.com</td>
-                        <td class="px-6 py-4">
-                            <select onchange="alert('Role updated to ' + this.value)" class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold focus:ring-1 focus:ring-blue-500">
-                                <option value="Student">Student</option>
-                                <option value="Instructor">Instructor</option>
-                                <option value="Administrator" selected>Admin</option>
-                            </select>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">June 15, 2026</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
-                        </td>
-                    </tr>
-
-                    <!-- User 4 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center">JS</div>
-                                <div class="font-bold text-slate-900">Jane Smith</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-600">jane@example.com</td>
-                        <td class="px-6 py-4">
-                            <select class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold">
-                                <option value="Student" selected>Student</option>
-                                <option value="Instructor">Instructor</option>
-                                <option value="Administrator">Admin</option>
-                            </select>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">June 21, 2026</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
-                        </td>
-                    </tr>
-
-                    <!-- User 5 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center">MJ</div>
-                                <div class="font-bold text-slate-900">Michael Johnson</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-600">michael@example.com</td>
-                        <td class="px-6 py-4">
-                            <select class="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded-md outline-none font-semibold">
-                                <option value="Student" selected>Student</option>
-                                <option value="Instructor">Instructor</option>
-                                <option value="Administrator">Admin</option>
-                            </select>
-                        </td>
-                        <td class="px-6 py-4">
+                            @else
                             <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                 <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
                                 Suspended
                             </span>
+                            @endif
                         </td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">June 22, 2026</td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</td>
                         <td class="px-6 py-4 text-right">
                             <button class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
                         </td>
                     </tr>
-
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <p class="font-medium">No users found</p>
+                                <p class="text-sm">Invite users to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

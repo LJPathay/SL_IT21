@@ -23,21 +23,11 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-        Route::get('/admin/modules', function () {
-            return view('admin.modules');
-        })->name('admin.modules');
-        Route::get('/admin/courses', function () {
-            return view('admin.courses');
-        })->name('admin.courses');
-        Route::get('/admin/quizzes', function () {
-            return view('admin.quizzes');
-        })->name('admin.quizzes');
-        Route::get('/admin/users', function () {
-            return view('admin.users');
-        })->name('admin.users');
-        Route::get('/admin/reports', function () {
-            return view('admin.reports');
-        })->name('admin.reports');
+        Route::get('/admin/modules', [DashboardController::class, 'adminModules'])->name('admin.modules');
+        Route::get('/admin/courses', [DashboardController::class, 'adminCourses'])->name('admin.courses');
+        Route::get('/admin/quizzes', [DashboardController::class, 'adminQuizzes'])->name('admin.quizzes');
+        Route::get('/admin/users', [DashboardController::class, 'adminUsers'])->name('admin.users');
+        Route::get('/admin/reports', [DashboardController::class, 'adminReports'])->name('admin.reports');
         
         Route::get('/admin/audit-logs', [DashboardController::class, 'auditLogs'])->name('admin.audit-logs');
         Route::get('/admin/security-logs', [DashboardController::class, 'securityLogs'])->name('admin.security-logs');
@@ -46,20 +36,12 @@ Route::middleware('auth')->group(function () {
     // Instructor routes
     Route::middleware('role:instructor')->group(function () {
         Route::get('/instructor/dashboard', [DashboardController::class, 'index'])->name('instructor.dashboard');
-        Route::get('/instructor/courses', function () {
-            return view('instructor.courses');
-        })->name('instructor.courses');
-        Route::get('/instructor/students', function () {
-            return view('instructor.students');
-        })->name('instructor.students');
-        Route::get('/instructor/assessments', function () {
-            return view('instructor.assessments');
-        })->name('instructor.assessments');
+        Route::get('/instructor/courses', [DashboardController::class, 'instructorCourses'])->name('instructor.courses');
+        Route::get('/instructor/students', [DashboardController::class, 'instructorStudents'])->name('instructor.students');
+        Route::get('/instructor/assessments', [DashboardController::class, 'instructorAssessments'])->name('instructor.assessments');
     });
 
-    // Module routes - accessible by all authenticated users based on their role
-    Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
-    Route::get('/modules/{module}', [ModuleController::class, 'show'])->name('modules.show');
+    // Module action routes - require authentication
     Route::post('/modules/{module}/enroll', [ModuleController::class, 'enroll'])->name('modules.enroll');
     Route::post('/modules/{module}/unenroll', [ModuleController::class, 'unenroll'])->name('modules.unenroll');
     Route::post('/modules/{module}/complete', [ModuleController::class, 'complete'])->name('modules.complete');
@@ -72,20 +54,14 @@ Route::middleware('auth')->group(function () {
     // Student routes
     Route::middleware('role:student')->group(function () {
         Route::get('/student/dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
-        Route::get('/student/courses', function () {
-            return view('student.courses');
-        })->name('student.courses');
-        Route::get('/student/quizzes', function () {
-            return view('student.quizzes');
-        })->name('student.quizzes');
-        Route::get('/student/leaderboard', function () {
-            return view('student.leaderboard');
-        })->name('student.leaderboard');
-        Route::get('/student/quizzes', function () {
-            return view('student.quizzes');
-        })->name('student.quizzes');
-        Route::get('/student/certificates', function () {
-            return view('student.certificates');
-        })->name('student.certificates');
+        Route::get('/student/courses', [DashboardController::class, 'studentCourses'])->name('student.courses');
+        Route::get('/student/quizzes', [DashboardController::class, 'studentQuizzes'])->name('student.quizzes');
+        Route::get('/student/leaderboard', [DashboardController::class, 'studentLeaderboard'])->name('student.leaderboard');
+        Route::get('/student/certificates', [DashboardController::class, 'studentCertificates'])->name('student.certificates');
+        Route::get('/student/inbox', [DashboardController::class, 'studentInbox'])->name('student.inbox');
     });
 });
+
+// Module view routes - accessible to guests (catalog browsing)
+Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
+Route::get('/modules/{module}', [ModuleController::class, 'show'])->name('modules.show');

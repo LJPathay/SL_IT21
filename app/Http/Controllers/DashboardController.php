@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Module;
+use App\Models\Quiz;
 use App\Models\QuizResult;
 use App\Models\SecurityLog;
 use App\Models\User;
@@ -185,8 +186,6 @@ class DashboardController extends Controller
      */
     public function auditLogs(Request $request)
     {
-        $this->authorize('viewAny', AuditLog::class);
-
         $query = AuditLog::query();
 
         // Filter by user
@@ -224,8 +223,6 @@ class DashboardController extends Controller
      */
     public function securityLogs(Request $request)
     {
-        $this->authorize('viewAny', SecurityLog::class);
-
         $query = SecurityLog::query();
 
         // Filter by event type
@@ -261,5 +258,239 @@ class DashboardController extends Controller
         return view('admin.security-logs', [
             'securityLogs' => $securityLogs,
         ]);
+    }
+
+    /**
+     * Admin courses page with course list.
+     */
+    public function adminCourses(Request $request)
+    {
+        $courses = Course::with('instructor', 'modules')->orderBy('title')->get();
+
+        return view('admin.courses', [
+            'courses' => $courses,
+        ]);
+    }
+
+    /**
+     * Admin modules page with module list and stats.
+     */
+    public function adminModules(Request $request)
+    {
+        $modules = Module::with('course')->orderBy('title')->get();
+        $totalModules = $modules->count();
+        $activeModules = $modules->where('is_active', true)->count();
+        $inactiveModules = $modules->where('is_active', false)->count();
+        $totalEnrollments = $modules->sum('enrollment_count');
+
+        return view('admin.modules', [
+            'modules' => $modules,
+            'totalModules' => $totalModules,
+            'activeModules' => $activeModules,
+            'inactiveModules' => $inactiveModules,
+            'totalEnrollments' => $totalEnrollments,
+        ]);
+    }
+
+    /**
+     * Admin users page with user list and filters.
+     */
+    public function adminUsers(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->role) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $users = $query->orderBy('name')->paginate(20);
+
+        return view('admin.users', [
+            'users' => $users,
+        ]);
+    }
+
+    /**
+     * Admin quizzes page with quiz list and questions.
+     */
+    public function adminQuizzes(Request $request)
+    {
+        $quizzes = Quiz::with('module')->orderBy('title')->get();
+        $totalQuizzes = $quizzes->count();
+        $totalQuestions = $quizzes->sum(function ($quiz) {
+            return $quiz->questions ? $quiz->questions->count() : 0;
+        });
+
+        return view('admin.quizzes', [
+            'quizzes' => $quizzes,
+            'totalQuizzes' => $totalQuizzes,
+            'totalQuestions' => $totalQuestions,
+        ]);
+    }
+
+    /**
+     * Admin reports page with analytics data.
+     */
+    public function adminReports(Request $request)
+    {
+        $totalUsers = User::count();
+        $totalCourses = Course::count();
+        $totalEnrollments = UserEnrollment::count();
+        $completedEnrollments = UserEnrollment::where('status', 'completed')->count();
+        $completionRate = $totalEnrollments > 0 ? round(($completedEnrollments / $totalEnrollments) * 100, 2) : 0;
+
+        $recentAuditLogs = AuditLog::orderBy('created_at', 'desc')->limit(10)->get();
+
+        return view('admin.reports', [
+            'totalUsers' => $totalUsers,
+            'totalCourses' => $totalCourses,
+            'totalEnrollments' => $totalEnrollments,
+            'completedEnrollments' => $completedEnrollments,
+            'completionRate' => $completionRate,
+            'recentAuditLogs' => $recentAuditLogs,
+        ]);
+    }
+
+    /**
+     * Instructor courses page.
+     */
+    public function instructorCourses(Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->taughtCourses()->with('modules')->get();
+
+        return view('instructor.courses', [
+            'courses' => $courses,
+        ]);
+    }
+
+    /**
+     * Instructor students page with enrolled students.
+     */
+    public function instructorStudents(Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->taughtCourses();
+        $students = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
+            ->with('user')
+            ->where('status', 'active')
+            ->get();
+
+        return view('instructor.students', [
+            'students' => $students,
+        ]);
+    }
+
+    /**
+     * Instructor assessments page with quiz results.
+     */
+    public function instructorAssessments(Request $request)
+    {
+        $user = Auth::user();
+        $courses = $user->taughtCourses();
+        $moduleIds = Module::whereIn('course_id', $courses->pluck('id'))->pluck('id');
+        $quizIds = Quiz::whereIn('module_id', $moduleIds)->pluck('id');
+        $quizResults = QuizResult::whereIn('quiz_id', $quizIds)
+            ->with(['user', 'quiz'])
+            ->latest('completed_at')
+            ->get();
+
+        return view('instructor.assessments', [
+            'quizResults' => $quizResults,
+        ]);
+    }
+
+    /**
+     * Student courses page with enrolled courses.
+     */
+    public function studentCourses(Request $request)
+    {
+        $user = Auth::user();
+        $enrolledCourses = $user->enrolledCourses()
+            ->with('instructor')
+            ->where('user_enrollments.status', 'active')
+            ->get();
+
+        return view('student.courses', [
+            'enrolledCourses' => $enrolledCourses,
+        ]);
+    }
+
+    /**
+     * Student quizzes page with available and completed quizzes.
+     */
+    public function studentQuizzes(Request $request)
+    {
+        $user = Auth::user();
+        $completedQuizzes = $user->quizResults()
+            ->with('quiz')
+            ->latest('completed_at')
+            ->get();
+
+        $availableQuizzes = Quiz::whereHas('module', function ($query) use ($user) {
+            $query->whereJsonContains('required_roles', $user->role)
+                  ->orWhereNull('required_roles');
+        })->whereNotIn('id', $completedQuizzes->pluck('quiz_id'))
+            ->get();
+
+        return view('student.quizzes', [
+            'completedQuizzes' => $completedQuizzes,
+            'availableQuizzes' => $availableQuizzes,
+        ]);
+    }
+
+    /**
+     * Student leaderboard page with rankings.
+     */
+    public function studentLeaderboard(Request $request)
+    {
+        $leaderboard = User::where('role', 'student')
+            ->withCount('certificates')
+            ->orderBy('certificates_count', 'desc')
+            ->limit(50)
+            ->get();
+
+        $userRank = $leaderboard->search(function ($user) {
+            return $user->id === Auth::id();
+        });
+
+        return view('student.leaderboard', [
+            'leaderboard' => $leaderboard,
+            'userRank' => $userRank !== false ? $userRank + 1 : null,
+        ]);
+    }
+
+    /**
+     * Student certificates page with earned certificates.
+     */
+    public function studentCertificates(Request $request)
+    {
+        $user = Auth::user();
+        $certificates = $user->certificates()
+            ->with('module')
+            ->where(function ($query) {
+                $query->where('expires_at', '>', now())
+                      ->orWhereNull('expires_at');
+            })
+            ->get();
+
+        return view('student.certificates', [
+            'certificates' => $certificates,
+        ]);
+    }
+
+    /**
+     * Student inbox page (email simulator).
+     */
+    public function studentInbox(Request $request)
+    {
+        return view('student.inbox');
     }
 }

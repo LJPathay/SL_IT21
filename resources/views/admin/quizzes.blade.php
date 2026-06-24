@@ -23,28 +23,28 @@
             <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">Q</div>
             <div>
                 <div class="text-xs text-slate-400 font-bold uppercase">Total Quizzes</div>
-                <div class="text-xl font-bold text-slate-900 mt-0.5">3 Quizzes</div>
+                <div class="text-xl font-bold text-slate-900 mt-0.5">{{ $totalQuizzes }} Quizzes</div>
             </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold text-lg">?</div>
             <div>
                 <div class="text-xs text-slate-400 font-bold uppercase">Total Questions</div>
-                <div class="text-xl font-bold text-slate-900 mt-0.5">30 Questions</div>
+                <div class="text-xl font-bold text-slate-900 mt-0.5">{{ $totalQuestions }} Questions</div>
             </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">%</div>
             <div>
                 <div class="text-xs text-slate-400 font-bold uppercase">Avg Pass Score</div>
-                <div class="text-xl font-bold text-slate-900 mt-0.5">82%</div>
+                <div class="text-xl font-bold text-slate-900 mt-0.5">80%</div>
             </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
             <div class="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-lg">!</div>
             <div>
                 <div class="text-xs text-slate-400 font-bold uppercase">Alerts</div>
-                <div class="text-xl font-bold text-red-650 mt-0.5">Password (Avg 64%)</div>
+                <div class="text-xl font-bold text-red-650 mt-0.5">None</div>
             </div>
         </div>
     </div>
@@ -56,82 +56,34 @@
         <div class="lg:col-span-2 space-y-6">
             <h3 class="font-bold text-slate-800 text-lg">Quiz Directory</h3>
 
-            <!-- Quiz Card 1: SQL Injection -->
+            @forelse($quizzes as $quiz)
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
                     <div>
                         <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span class="px-2.5 py-0.5 bg-green-150/60 text-green-700 text-xs font-semibold rounded-md">Web Security</span>
-                            <span class="text-xs text-slate-450">Pass rate: 91%</span>
+                            <span class="px-2.5 py-0.5 bg-green-150/60 text-green-700 text-xs font-semibold rounded-md">{{ $quiz->module->category ?? 'General' }}</span>
+                            <span class="text-xs text-slate-450">Pass rate: 80%</span>
                         </div>
-                        <h4 class="font-bold text-slate-900 text-lg">SQL Injection Prevention Quiz</h4>
-                        <p class="text-slate-500 text-xs mt-0.5">Linked to "SQL Injection Prevention" module. Passing requirement: 80%</p>
+                        <h4 class="font-bold text-slate-900 text-lg">{{ $quiz->title }}</h4>
+                        <p class="text-slate-500 text-xs mt-0.5">Linked to "{{ $quiz->module->title ?? 'Unknown' }}" module. Passing requirement: 80%</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">10 Questions</span>
-                        <button class="p-2 text-slate-455 hover:text-blue-600 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Sample Questions List inside the card -->
-                <div class="divide-y divide-slate-100 p-6 space-y-4">
-                    <div class="text-xs font-bold text-slate-450 uppercase tracking-wider">Sample Questions</div>
-                    
-                    <div class="pt-3 space-y-2">
-                        <div class="flex items-start gap-2.5">
-                            <span class="font-bold text-slate-400 text-sm">Q1.</span>
-                            <p class="text-slate-800 text-sm font-semibold">What vulnerability is created when user input is concatenated directly into a SQL statement?</p>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-7">
-                            <div class="text-xs p-2 bg-green-50 border border-green-100 rounded-lg text-green-755 font-medium flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                A. SQL Injection (SQLi)
-                            </div>
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">B. Cross-Site Scripting (XSS)</div>
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">C. Denial of Service (DoS)</div>
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">D. Buffer Overflow</div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 space-y-2">
-                        <div class="flex items-start gap-2.5">
-                            <span class="font-bold text-slate-400 text-sm">Q2.</span>
-                            <p class="text-slate-800 text-sm font-semibold">Which of the following is the most effective primary defense against SQL Injection?</p>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-7">
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">A. Web Application Firewalls (WAF)</div>
-                            <div class="text-xs p-2 bg-green-50 border border-green-100 rounded-lg text-green-755 font-medium flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                B. Prepared Statements (Parameterized Queries)
-                            </div>
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">C. Encrypting SQL databases</div>
-                            <div class="text-xs p-2 bg-slate-50 border border-slate-100 rounded-lg text-slate-600 font-medium">D. Strong account passwords</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quiz Card 2: Phishing -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span class="px-2.5 py-0.5 bg-red-150/60 text-red-700 text-xs font-semibold rounded-md">Social Engineering</span>
-                            <span class="text-xs text-slate-450">Pass rate: 86%</span>
-                        </div>
-                        <h4 class="font-bold text-slate-900 text-lg">Phishing Detection Quiz</h4>
-                        <p class="text-slate-500 text-xs mt-0.5">Linked to "Phishing Detection" module. Passing requirement: 80%</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">10 Questions</span>
+                        <span class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">{{ $quiz->questions ? $quiz->questions->count() : 0 }} Questions</span>
                         <button class="p-2 text-slate-455 hover:text-blue-600 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                     </div>
                 </div>
             </div>
+            @empty
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
+                <div class="flex flex-col items-center gap-3">
+                    <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <p class="font-medium">No quizzes found</p>
+                    <p class="text-sm">Create your first quiz to get started.</p>
+                </div>
+            </div>
+            @endforelse
 
         </div>
 

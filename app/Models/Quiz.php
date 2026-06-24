@@ -42,6 +42,11 @@ class Quiz extends Model
         return $this->hasMany(QuizResult::class);
     }
 
+    public function questions()
+    {
+        return $this->hasMany(QuizQuestion::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

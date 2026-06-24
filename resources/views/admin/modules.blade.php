@@ -21,19 +21,19 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Modules</div>
-            <div class="text-2xl font-bold text-slate-900 mt-1">4</div>
+            <div class="text-2xl font-bold text-slate-900 mt-1">{{ $totalModules }}</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Active Modules</div>
-            <div class="text-2xl font-bold text-green-600 mt-1">3</div>
+            <div class="text-2xl font-bold text-green-600 mt-1">{{ $activeModules }}</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Drafts</div>
-            <div class="text-2xl font-bold text-slate-500 mt-1">1</div>
+            <div class="text-2xl font-bold text-slate-500 mt-1">{{ $inactiveModules }}</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Enrollments</div>
-            <div class="text-2xl font-bold text-blue-600 mt-1">1,556</div>
+            <div class="text-2xl font-bold text-blue-600 mt-1">{{ $totalEnrollments ?? 0 }}</div>
         </div>
     </div>
 
@@ -77,123 +77,58 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    
-                    <!-- Row 1 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    @forelse($modules as $module)
+                    <tr class="hover:bg-slate-50/50 transition-colors {{ !$module->is_active ? 'bg-amber-50/5' : '' }}">
                         <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">SQL Injection Prevention</div>
-                            <div class="text-xs text-slate-450 mt-0.5">Source: W3Schools (Licensed)</div>
+                            <div class="font-bold text-slate-900">{{ $module->title }}</div>
+                            <div class="text-xs text-slate-450 mt-0.5">{{ $module->description ?? 'No description' }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg border border-green-100">Web Security</span>
+                            <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg border border-green-100">{{ $module->category ?? 'General' }}</span>
                         </td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">4 lessons</td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">312</td>
+                        <td class="px-6 py-4 text-sm font-medium text-slate-700">{{ $module->lesson_count ?? 0 }} lessons</td>
+                        <td class="px-6 py-4 text-sm font-medium text-slate-700">{{ $module->enrollment_count ?? 0 }}</td>
                         <td class="px-6 py-4">
+                            @if($module->is_active)
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
                                 Published
                             </span>
+                            @else
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                <span class="h-1.5 w-1.5 rounded-full bg-slate-450"></span>
+                                Draft
+                            </span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right text-sm">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{{ url('/modules/1') }}" target="_blank" class="p-1 text-slate-400 hover:text-blue-600 transition-colors" title="View details page">
+                                @if($module->is_active)
+                                <a href="{{ url('/modules/' . $module->id) }}" target="_blank" class="p-1 text-slate-400 hover:text-blue-600 transition-colors" title="View details page">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </a>
+                                @else
+                                <a href="#" class="p-1 text-slate-300 cursor-not-allowed">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </a>
+                                @endif
                                 <button class="p-1 text-slate-400 hover:text-slate-600 transition-colors" title="Edit course settings">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
                             </div>
                         </td>
                     </tr>
-
-                    <!-- Row 2 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Phishing Detection Awareness</div>
-                            <div class="text-xs text-slate-450 mt-0.5">Source: NIST / Custom</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">Social Engineering</span>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">5 lessons</td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">814</td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                Published
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ url('/modules/2') }}" target="_blank" class="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-                                <button class="p-1 text-slate-400 hover:text-slate-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p class="font-medium">No modules found</p>
+                                <p class="text-sm">Create your first training module to get started.</p>
                             </div>
                         </td>
                     </tr>
-
-                    <!-- Row 3 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Password Security Assessment</div>
-                            <div class="text-xs text-slate-450 mt-0.5">Source: OWASP Guidelines</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">Web Security</span>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">4 lessons</td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">241</td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                Published
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ url('/modules/3') }}" target="_blank" class="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-                                <button class="p-1 text-slate-400 hover:text-slate-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Row 4 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors bg-amber-50/5">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Malware Threat Recognition</div>
-                            <div class="text-xs text-slate-450 mt-0.5">Source: Custom Template</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg border border-amber-100">Malware</span>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">6 lessons</td>
-                        <td class="px-6 py-4 text-sm font-medium text-slate-700">189</td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                                <span class="h-1.5 w-1.5 rounded-full bg-slate-450"></span>
-                                Draft
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="#" class="p-1 text-slate-300 cursor-not-allowed">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-                                <button class="p-1 text-slate-400 hover:text-slate-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-
+                    @endforelse
                 </tbody>
             </table>
         </div>

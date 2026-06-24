@@ -16,8 +16,12 @@ class ModuleController extends Controller
     {
         $user = Auth::user();
 
-        // Get modules accessible to this user's role
-        $query = Module::byRole($user->role)->active();
+        // Get modules - filter by role only if user is authenticated
+        $query = Module::query()->active();
+
+        if ($user) {
+            $query->byRole($user->role);
+        }
 
         // Filter by category if provided
         if ($request->category) {
@@ -40,8 +44,8 @@ class ModuleController extends Controller
 
         $modules = $query->ordered()->paginate(12);
 
-        // Get user's enrolled modules
-        $enrolledModuleIds = $user->enrolledModules()->pluck('modules.id')->toArray();
+        // Get user's enrolled modules (only if authenticated)
+        $enrolledModuleIds = $user ? $user->enrolledModules()->pluck('modules.id')->toArray() : [];
 
         // Get all categories for filter
         $categories = Module::distinct()->pluck('category')->sort();
@@ -60,24 +64,32 @@ class ModuleController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user has access to this module
-        $requiredRoles = $module->required_roles ?? [];
-        if (!empty($requiredRoles) && !in_array($user->role, $requiredRoles)) {
-            abort(403, 'Unauthorized');
+        // Check if user has access to this module (only if authenticated)
+        if ($user) {
+            $requiredRoles = $module->required_roles ?? [];
+            if (!empty($requiredRoles) && !in_array($user->role, $requiredRoles)) {
+                abort(403, 'Unauthorized');
+            }
         }
 
-        // Check if user is enrolled
-        $enrollment = UserEnrollment::where('user_id', $user->id)
-            ->where('module_id', $module->id)
-            ->first();
+        // Check if user is enrolled (only if authenticated)
+        $enrollment = null;
+        if ($user) {
+            $enrollment = UserEnrollment::where('user_id', $user->id)
+                ->where('module_id', $module->id)
+                ->first();
+        }
 
-        // Get related modules
-        $relatedModules = Module::byRole($user->role)
-            ->active()
+        // Get related modules (filter by role only if authenticated)
+        $relatedQuery = Module::active()
             ->where('id', '!=', $module->id)
-            ->where('category', $module->category)
-            ->limit(3)
-            ->get();
+            ->where('category', $module->category);
+
+        if ($user) {
+            $relatedQuery->byRole($user->role);
+        }
+
+        $relatedModules = $relatedQuery->limit(3)->get();
 
         return view('modules.show', [
             'module' => $module,

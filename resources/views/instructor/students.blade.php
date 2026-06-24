@@ -12,8 +12,8 @@
             <p class="text-slate-500 text-sm">Monitor enrolled students, track lesson completion rates, and send direct reminders.</p>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl">Cohorts assigned: 2</span>
-            <span class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-2 rounded-xl">Total Students: 142</span>
+            <span class="text-xs font-bold text-slate-500 bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl">Cohorts assigned: {{ $students->count() }}</span>
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-2 rounded-xl">Total Students: {{ $students->count() }}</span>
         </div>
     </div>
 
@@ -55,82 +55,41 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    
-                    <!-- Student 1 -->
+                    @forelse($students as $enrollment)
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Lebron James Pathay</div>
-                            <div class="text-xs text-slate-500 mt-0.5">lebron@example.com</div>
+                            <div class="font-bold text-slate-900">{{ $enrollment->user->name ?? 'Unknown' }}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">{{ $enrollment->user->email ?? 'N/A' }}</div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-slate-700 font-medium">Phishing Detection Awareness</td>
+                        <td class="px-6 py-4 text-sm text-slate-700 font-medium">{{ $enrollment->course->title ?? 'Unknown Course' }}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-24 bg-slate-100 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 40%"></div>
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $enrollment->progress_percentage ?? 0 }}%"></div>
                                 </div>
-                                <span class="text-xs font-bold text-slate-600">40%</span>
+                                <span class="text-xs font-bold text-slate-600">{{ $enrollment->progress_percentage ?? 0 }}%</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm font-semibold text-green-600">92%</td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">2 minutes ago</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-green-600">N/A</td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $enrollment->updated_at ? $enrollment->updated_at->diffForHumans() : 'N/A' }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
-                                <button onclick="toggleMessageModal('lebron@example.com')" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
-                                <button onclick="alert('Nudge notification sent to student!')" class="text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-lg transition-colors">Nudge</button>
+                                <button onclick="toggleMessageModal('{{ $enrollment->user->email ?? '' }}')" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
+                                <button class="text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-lg transition-colors">Nudge</button>
                             </div>
                         </td>
                     </tr>
-
-                    <!-- Student 2 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Jane Smith</div>
-                            <div class="text-xs text-slate-500 mt-0.5">jane@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-700 font-medium">Password Security Assessment</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-24 bg-slate-100 rounded-full h-2">
-                                    <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
-                                </div>
-                                <span class="text-xs font-bold text-slate-600">100%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-semibold text-green-600">88%</td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">1 hour ago</td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <button onclick="toggleMessageModal('jane@example.com')" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
-                                <button class="text-xs text-slate-350 cursor-not-allowed border border-slate-100 px-3 py-1.5 rounded-lg font-semibold" disabled>Completed</button>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <p class="font-medium">No students enrolled</p>
+                                <p class="text-sm">Students will appear here when they enroll in your courses.</p>
                             </div>
                         </td>
                     </tr>
-
-                    <!-- Student 3 -->
-                    <tr class="hover:bg-slate-50/50 transition-colors bg-red-50/10">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Michael Johnson</div>
-                            <div class="text-xs text-slate-500 mt-0.5">michael@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-700 font-medium">SQL Injection Prevention</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-24 bg-slate-100 rounded-full h-2">
-                                    <div class="bg-red-500 h-2 rounded-full" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs font-bold text-slate-600">15%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-semibold text-red-600">54%</td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">3 days ago</td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <button onclick="toggleMessageModal('michael@example.com')" class="text-xs bg-blue-550 text-blue-700 bg-blue-50 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
-                                <button onclick="alert('Warning notification sent to struggling student.')" class="text-xs bg-red-50 text-red-755 hover:bg-red-100 border border-red-200 font-bold px-3 py-1.5 rounded-lg transition-colors">Alert</button>
-                            </div>
-                        </td>
-                    </tr>
-
+                    @endforelse
                 </tbody>
             </table>
         </div>

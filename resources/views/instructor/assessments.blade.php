@@ -76,49 +76,38 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm font-medium">
-                    
-                    <!-- Row 1 Lebron -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    @forelse($quizResults as $result)
+                    <tr class="hover:bg-slate-50/50 transition-colors {{ $result->score < 70 ? 'bg-red-50/10' : '' }}">
                         <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Lebron James Pathay</div>
-                            <div class="text-xs text-slate-450 mt-0.5">lebron@example.com</div>
+                            <div class="font-bold text-slate-900">{{ $result->user->name ?? 'Unknown' }}</div>
+                            <div class="text-xs text-slate-450 mt-0.5">{{ $result->user->email ?? 'N/A' }}</div>
                         </td>
-                        <td class="px-6 py-4 text-green-600">92% <span class="text-[10px] text-slate-400 font-semibold">(1 attempt)</span></td>
+                        <td class="px-6 py-4 {{ $result->score >= 80 ? 'text-green-600' : ($result->score >= 70 ? 'text-blue-600' : 'text-red-600') }}">
+                            {{ $result->score ?? 0 }}% <span class="text-[10px] text-slate-400 font-semibold">(1 attempt)</span>
+                        </td>
                         <td class="px-6 py-4 text-slate-400 font-medium">—</td>
                         <td class="px-6 py-4 text-slate-400 font-medium">—</td>
                         <td class="px-6 py-4 text-right">
+                            @if($result->score >= 80)
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Excellent</span>
-                        </td>
-                    </tr>
-
-                    <!-- Row 2 Jane -->
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Jane Smith</div>
-                            <div class="text-xs text-slate-450 mt-0.5">jane@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-green-600">95% <span class="text-[10px] text-slate-400 font-semibold">(1 attempt)</span></td>
-                        <td class="px-6 py-4 text-slate-400 font-medium">—</td>
-                        <td class="px-6 py-4 text-green-600">88% <span class="text-[10px] text-slate-400 font-semibold">(2 attempts)</span></td>
-                        <td class="px-6 py-4 text-right">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Excellent</span>
-                        </td>
-                    </tr>
-
-                    <!-- Row 3 Michael -->
-                    <tr class="hover:bg-slate-50/50 transition-colors bg-red-50/10">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900">Michael Johnson</div>
-                            <div class="text-xs text-slate-450 mt-0.5">michael@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-red-600">54% <span class="text-[10px] text-slate-400 font-semibold">(3 attempts)</span></td>
-                        <td class="px-6 py-4 text-slate-400 font-medium">—</td>
-                        <td class="px-6 py-4 text-slate-400 font-medium">—</td>
-                        <td class="px-6 py-4 text-right">
+                            @elseif($result->score >= 70)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Good</span>
+                            @else
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Needs Attention</span>
+                            @endif
                         </td>
                     </tr>
-
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p class="font-medium">No quiz results found</p>
+                                <p class="text-sm">Quiz results will appear here as students complete assessments.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

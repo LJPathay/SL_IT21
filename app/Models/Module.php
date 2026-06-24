@@ -18,6 +18,9 @@ class Module extends Model
         'duration_minutes',
         'thumbnail_url',
         'required_roles',
+        'course_id',
+        'lesson_count',
+        'enrollment_count',
         'order',
         'is_active',
     ];
@@ -28,9 +31,9 @@ class Module extends Model
     ];
 
     // Relationships
-    public function courses()
+    public function course()
     {
-        return $this->hasMany(Course::class);
+        return $this->belongsTo(Course::class);
     }
 
     public function quizzes()
