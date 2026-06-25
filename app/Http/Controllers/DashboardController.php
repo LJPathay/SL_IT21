@@ -446,26 +446,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Student leaderboard page with rankings.
-     */
-    public function studentLeaderboard(Request $request)
-    {
-        $leaderboard = User::where('role', 'student')
-            ->withCount('certificates')
-            ->orderBy('certificates_count', 'desc')
-            ->limit(50)
-            ->get();
 
-        $userRank = $leaderboard->search(function ($user) {
-            return $user->id === Auth::id();
-        });
-
-        return view('student.leaderboard', [
-            'leaderboard' => $leaderboard,
-            'userRank' => $userRank !== false ? $userRank + 1 : null,
-        ]);
-    }
 
     /**
      * Student certificates page with earned certificates.

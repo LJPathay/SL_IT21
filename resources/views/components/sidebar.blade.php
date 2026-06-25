@@ -44,7 +44,6 @@
             ['title' => 'Learning Modules', 'url' => url('/modules'), 'icon' => 'modules', 'active' => $segment === 'modules'],
             ['title' => 'My Courses', 'url' => url('/student/courses'), 'icon' => 'courses', 'active' => $segment === 'student' && $subSegment === 'courses'],
             ['title' => 'Quizzes & Exams', 'url' => url('/student/quizzes'), 'icon' => 'quizzes', 'active' => $segment === 'student' && $subSegment === 'quizzes'],
-            ['title' => 'Leaderboard', 'url' => url('/student/leaderboard'), 'icon' => 'leaderboard', 'active' => $segment === 'student' && $subSegment === 'leaderboard'],
             ['title' => 'My Certificates', 'url' => url('/student/certificates'), 'icon' => 'certificates', 'active' => $segment === 'student' && $subSegment === 'certificates'],
         ];
     }

@@ -11,12 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed users first
         $this->call(UserSeeder::class);
-
-        // Then seed modules, courses, and enrollments
         $this->call(ModuleSeeder::class);
         $this->call(CourseSeeder::class);
-        $this->call(EnrollmentSeeder::class);
+        $this->call(QuizSeeder::class);
     }
 }

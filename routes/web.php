@@ -12,6 +12,16 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::get('/login/mfa', [AuthController::class, 'showMfaForm'])->name('login.mfa');
+    Route::post('/login/mfa', [AuthController::class, 'verifyMfa'])->name('login.mfa.post');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+    // Password reset
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
@@ -56,7 +66,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/student/dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
         Route::get('/student/courses', [DashboardController::class, 'studentCourses'])->name('student.courses');
         Route::get('/student/quizzes', [DashboardController::class, 'studentQuizzes'])->name('student.quizzes');
-        Route::get('/student/leaderboard', [DashboardController::class, 'studentLeaderboard'])->name('student.leaderboard');
+        Route::get('/student/quizzes/{quiz}', [ModuleController::class, 'showQuiz'])->name('student.quizzes.show');
+        Route::post('/student/quizzes/{quiz}/submit', [ModuleController::class, 'submitQuiz'])->name('student.quizzes.submit');
         Route::get('/student/certificates', [DashboardController::class, 'studentCertificates'])->name('student.certificates');
         Route::get('/student/inbox', [DashboardController::class, 'studentInbox'])->name('student.inbox');
     });

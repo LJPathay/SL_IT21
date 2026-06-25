@@ -15,6 +15,12 @@
             <p class="text-slate-500 text-sm mt-2">Enter your credentials to access the platform</p>
         </div>
 
+        @if (session('success'))
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-green-800 text-sm">{{ session('success') }}</p>
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p class="text-red-800 text-sm font-medium mb-2">Login failed. Please check your credentials.</p>
@@ -38,10 +44,18 @@
             <div>
                 <div class="flex items-center justify-between mb-1">
                     <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-                    <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+                    <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
                 </div>
                 <input id="password" name="password" type="password" autocomplete="current-password" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all @error('password') border-red-500 @enderror">
                 @error('password')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Google reCAPTCHA v2 --}}
+            <div>
+                <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
+                @error('g-recaptcha-response')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -59,7 +73,7 @@
         <div class="mt-8 pt-6 border-t border-slate-100">
             <p class="text-xs text-center text-slate-500">
                 Don't have an account? 
-                <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Contact support</a>
+                <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-500 font-medium">Sign up now</a>
             </p>
         </div>
 
@@ -67,3 +81,7 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endpush

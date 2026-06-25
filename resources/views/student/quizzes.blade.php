@@ -47,12 +47,12 @@
                         <div class="font-black text-slate-900 text-base">{{ $result->score ?? 0 }}%</div>
                         <div class="text-[10px] text-slate-450 font-bold uppercase">Score</div>
                     </div>
-                    <button class="bg-white border border-slate-250 hover:bg-slate-50 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition-colors">Retake Quiz</button>
+                    <a href="{{ route('student.quizzes.show', $result->quiz_id) }}" class="inline-block bg-white border border-slate-250 hover:bg-slate-50 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition-colors">Retake Quiz</a>
                 </div>
             </div>
             @empty
             @endforelse
-
+ 
             @forelse($availableQuizzes as $quiz)
             <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/20 transition-colors">
                 <div class="space-y-1">
@@ -64,7 +64,7 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right shrink-0 text-slate-350 italic font-semibold text-xs pr-2">Not attempted</div>
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-200 transition-colors">Take Quiz</button>
+                    <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-200 transition-colors">Take Quiz</a>
                 </div>
             </div>
             @empty

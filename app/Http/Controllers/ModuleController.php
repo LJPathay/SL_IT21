@@ -7,6 +7,10 @@ use App\Models\UserEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\Quiz;
+use App\Models\QuizResult;
+use App\Models\Certificate;
+
 class ModuleController extends Controller
 {
     /**
@@ -187,5 +191,131 @@ class ModuleController extends Controller
         $enrollment->save();
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Display the specified quiz.
+     */
+    public function showQuiz(Quiz $quiz)
+    {
+        $user = Auth::user();
+
+        // Enforce progression rules
+        $module = $quiz->module;
+        if ($module) {
+            if ($module->difficulty === 'intermediate') {
+                $hasCompletedBeginner = UserEnrollment::where('user_id', $user->id)
+                    ->whereHas('module', function ($q) {
+                        $q->where('difficulty', 'beginner');
+                    })
+                    ->where('status', 'completed')
+                    ->exists();
+                if (!$hasCompletedBeginner) {
+                    return redirect()->route('student.quizzes')->with('error', 'You must complete a Beginner module first to unlock Intermediate quizzes.');
+                }
+            } elseif ($module->difficulty === 'advanced') {
+                $hasCompletedIntermediate = UserEnrollment::where('user_id', $user->id)
+                    ->whereHas('module', function ($q) {
+                        $q->where('difficulty', 'intermediate');
+                    })
+                    ->where('status', 'completed')
+                    ->exists();
+                if (!$hasCompletedIntermediate) {
+                    return redirect()->route('student.quizzes')->with('error', 'You must complete an Intermediate module first to unlock Advanced quizzes.');
+                }
+            }
+        }
+
+        // Check enrollment
+        $enrollment = UserEnrollment::where('user_id', $user->id)
+            ->where('module_id', $quiz->module_id)
+            ->first();
+
+        if (!$enrollment) {
+            // Enroll user automatically or prompt
+            UserEnrollment::create([
+                'user_id' => $user->id,
+                'module_id' => $quiz->module_id,
+                'course_id' => $quiz->course_id,
+                'status' => 'active',
+                'progress_percentage' => 50,
+                'enrolled_at' => now(),
+            ]);
+        }
+
+        $quiz->load('questions');
+
+        return view('student.take-quiz', [
+            'quiz' => $quiz,
+        ]);
+    }
+
+    /**
+     * Submit and auto-score the quiz.
+     */
+    public function submitQuiz(Request $request, Quiz $quiz)
+    {
+        $user = Auth::user();
+        $questions = $quiz->questions;
+
+        if ($questions->isEmpty()) {
+            return redirect()->route('student.quizzes')->with('error', 'This quiz has no questions.');
+        }
+
+        $correctCount = 0;
+        $answers = $request->input('answers', []);
+
+        foreach ($questions as $question) {
+            $userAns = $answers[$question->id] ?? null;
+            if ($userAns !== null && trim($userAns) == trim($question->correct_answer)) {
+                $correctCount++;
+            }
+        }
+
+        $scorePercentage = round(($correctCount / $questions->count()) * 100);
+        $passed = $scorePercentage >= $quiz->passing_score;
+
+        // Save result
+        QuizResult::create([
+            'user_id' => $user->id,
+            'quiz_id' => $quiz->id,
+            'score' => $scorePercentage,
+            'passed' => $passed,
+            'completed_at' => now(),
+        ]);
+
+        if ($passed) {
+            // Update enrollment status
+            $enrollment = UserEnrollment::where('user_id', $user->id)
+                ->where('module_id', $quiz->module_id)
+                ->first();
+
+            if ($enrollment) {
+                $enrollment->status = 'completed';
+                $enrollment->progress_percentage = 100;
+                $enrollment->completed_at = now();
+                $enrollment->save();
+            }
+
+            // Issue Certificate
+            $certNumber = 'CERT-' . strtoupper(bin2hex(random_bytes(4)));
+            $credentialId = 'CRED-' . strtoupper(bin2hex(random_bytes(6)));
+
+            Certificate::firstOrCreate([
+                'user_id' => $user->id,
+                'module_id' => $quiz->module_id,
+            ], [
+                'course_id' => $quiz->course_id,
+                'certificate_number' => $certNumber,
+                'credential_id' => $credentialId,
+                'title' => 'Certificate of Completion: ' . $quiz->title,
+                'issued_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('student.quizzes')->with(
+            $passed ? 'success' : 'error',
+            "Quiz submitted! You scored {$scorePercentage}% (" . ($passed ? "Passed - Certificate Issued!" : "Failed - Try again") . ")"
+        );
     }
 }
