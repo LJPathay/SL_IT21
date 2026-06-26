@@ -9,105 +9,106 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center">
             <div class="text-sm font-medium text-slate-500 mb-1">Assigned Students</div>
-            <div class="text-3xl font-bold text-slate-900">142</div>
-            <div class="mt-2 text-sm text-green-600 flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                <span>12 new this week</span>
-            </div>
+            <div class="text-3xl font-bold text-slate-900">{{ $uniqueStudents ?? 0 }}</div>
+            <div class="mt-2 text-xs text-slate-500">Across {{ $courses->count() ?? 0 }} courses</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center">
             <div class="text-sm font-medium text-slate-500 mb-1">Avg. Class Score</div>
-            <div class="text-3xl font-bold text-slate-900">82%</div>
-            <div class="mt-2 text-sm text-slate-500 flex items-center gap-1">
-                <span>Across all quizzes</span>
-            </div>
+            <div class="text-3xl font-bold text-slate-900">{{ $avgQuizScore ?? 0 }}%</div>
+            <div class="mt-2 text-xs text-slate-500">Across all quizzes</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center">
             <div class="text-sm font-medium text-slate-500 mb-1">Needs Attention</div>
-            <div class="text-3xl font-bold text-red-600">8</div>
-            <div class="mt-2 text-sm text-slate-500 flex items-center gap-1">
-                <span>Students failing assessments</span>
+            <div class="text-3xl font-bold text-red-600">{{ $needsAttention->count() ?? 0 }}</div>
+            <div class="mt-2 text-xs text-slate-500">Students below 50% progress</div>
+        </div>
+    </div>
+
+    <!-- Student Progress Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <h3 class="font-semibold text-slate-800">Average Completion Rate</h3>
+                <span class="text-2xl font-bold text-green-600">{{ $avgCompletion ?? 0 }}%</span>
             </div>
+            <div class="p-6">
+                <div class="w-full bg-slate-100 rounded-full h-4">
+                    <div class="bg-green-500 h-4 rounded-full transition-all" style="width: {{ $avgCompletion ?? 0 }}%"></div>
+                </div>
+                <div class="mt-4 text-sm text-slate-600">
+                    <span class="font-medium">Overall progress:</span> {{ $enrolledStudents->count() ?? 0 }} total enrollments
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-slate-800 mb-4">Your Courses</h3>
+            @if($courses && $courses->count() > 0)
+                <div class="space-y-3">
+                    @foreach($courses->take(3) as $course)
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-slate-900">{{ $course->title }}</div>
+                            <div class="text-xs text-slate-500">{{ $course->code }}</div>
+                        </div>
+                        <div class="text-sm text-slate-600">{{ $course->enrollments->count() }} students</div>
+                    </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center text-slate-500 text-sm">No courses assigned yet</div>
+            @endif
         </div>
     </div>
 
     <!-- Student Tracking Table -->
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mt-8">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
             <h3 class="font-semibold text-slate-800">Student Progress Tracking</h3>
-            <button class="text-sm bg-white border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
-                Export CSV
-            </button>
+            @if($needsAttention && $needsAttention->count() > 0)
+            <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">{{ $needsAttention->count() }} need attention</span>
+            @endif
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white border-b border-slate-200 text-sm text-slate-500">
                         <th class="px-6 py-4 font-medium">Student Name</th>
-                        <th class="px-6 py-4 font-medium">Current Module</th>
+                        <th class="px-6 py-4 font-medium">Course</th>
                         <th class="px-6 py-4 font-medium">Progress</th>
-                        <th class="px-6 py-4 font-medium">Avg Score</th>
+                        <th class="px-6 py-4 font-medium">Last Activity</th>
                         <th class="px-6 py-4 font-medium text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-slate-900">Lebron James Pathay</div>
-                            <div class="text-xs text-slate-500">lebron@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-700">Phishing Detection Awareness</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2 max-w-[100px]">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 40%"></div>
+                    @if($recentActivity && $recentActivity->count() > 0)
+                        @foreach($recentActivity as $enrollment)
+                        @php $student = $enrollment->user; $course = $enrollment->course; @endphp
+                        <tr class="hover:bg-slate-50 {{ $enrollment->progress_percentage < 50 ? 'bg-red-50/30' : '' }}">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-900">{{ $student->name ?? 'Unknown' }}</div>
+                                <div class="text-xs text-slate-500">{{ $student->email ?? '' }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-700">{{ $course->title ?? 'Unknown Course' }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-full bg-slate-200 rounded-full h-2 max-w-[100px]">
+                                        <div class="bg-{{ $enrollment->progress_percentage >= 70 ? 'green' : ($enrollment->progress_percentage >= 50 ? 'blue' : 'red') }}-500 h-2 rounded-full" style="width: {{ $enrollment->progress_percentage }}%"></div>
+                                    </div>
+                                    <span class="text-xs text-slate-600">{{ $enrollment->progress_percentage }}%</span>
                                 </div>
-                                <span class="text-xs text-slate-600">40%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-green-600">92%</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Details</button>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-slate-900">Jane Smith</div>
-                            <div class="text-xs text-slate-500">jane@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-700">Password Security</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2 max-w-[100px]">
-                                    <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
-                                </div>
-                                <span class="text-xs text-slate-600">100%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-green-600">88%</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Details</button>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 bg-red-50/30">
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-slate-900">Michael Johnson</div>
-                            <div class="text-xs text-slate-500">michael@example.com</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-700">Malware Threat Recognition</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-full bg-slate-200 rounded-full h-2 max-w-[100px]">
-                                    <div class="bg-red-500 h-2 rounded-full" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-slate-600">15%</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-red-600">54%</td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Message Student</button>
-                        </td>
-                    </tr>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-slate-500">{{ $enrollment->updated_at?->diffForHumans() ?? 'Recently' }}</td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Details</a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-slate-500 text-sm">No student activity yet</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>

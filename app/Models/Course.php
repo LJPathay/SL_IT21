@@ -21,6 +21,7 @@ class Course extends Model
         'start_date',
         'end_date',
         'is_active',
+        'thumbnail_url',
     ];
 
     protected $casts = [

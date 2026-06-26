@@ -1,23 +1,41 @@
 @php
     $segment = request()->segment(1);
-    
-    // Default values if not overridden by the view
-    if ($segment === 'admin') {
-        $user_role = 'Administrator';
-        $user_name = 'Admin User';
-        $user_initial = 'A';
-    } elseif ($segment === 'instructor') {
-        $user_role = 'Instructor';
-        $user_name = 'Instructor User';
-        $user_initial = 'I';
-    } else {
-        $user_role = 'Student';
-        $user_name = 'Student User';
-        $user_initial = 'S';
-    }
-    
-    // Automatically set header title based on current segment/action if not overridden
     $subSegment = request()->segment(2);
+
+    // Use authenticated user's role instead of URL segment for accuracy
+    if (auth()->check()) {
+        $authUser = auth()->user();
+        if ($authUser->isAdmin()) {
+            $user_role = 'Administrator';
+            $user_name = $authUser->name ?? 'Admin User';
+            $user_initial = strtoupper(substr($user_name, 0, 1));
+        } elseif ($authUser->isInstructor()) {
+            $user_role = 'Instructor';
+            $user_name = $authUser->name ?? 'Instructor User';
+            $user_initial = strtoupper(substr($user_name, 0, 1));
+        } else {
+            $user_role = 'Student';
+            $user_name = $authUser->name ?? 'Student User';
+            $user_initial = strtoupper(substr($user_name, 0, 1));
+        }
+    } else {
+        // Fallback for non-authenticated users
+        if ($segment === 'admin') {
+            $user_role = 'Administrator';
+            $user_name = 'Admin User';
+            $user_initial = 'A';
+        } elseif ($segment === 'instructor') {
+            $user_role = 'Instructor';
+            $user_name = 'Instructor User';
+            $user_initial = 'I';
+        } else {
+            $user_role = 'Student';
+            $user_name = 'Student User';
+            $user_initial = 'S';
+        }
+    }
+
+    // Automatically set header title based on current segment/action if not overridden
     if ($segment === 'admin') {
         $header_title = match($subSegment) {
             'dashboard' => 'Administrator Dashboard',
@@ -30,14 +48,14 @@
         };
     } elseif ($segment === 'instructor') {
         $header_title = match($subSegment) {
-            'dashboard' => 'Instructor Overview',
+            'dashboard' => 'Instructor Dashboard',
             'students' => 'Student Progress Tracking',
             'assessments' => 'Assessment Performance',
             default => 'Instructor Portal'
         };
     } else { // student
         $header_title = match($subSegment) {
-            'dashboard' => 'My Learning Dashboard',
+            'dashboard' => 'Student Dashboard',
             'courses' => 'My Enrolled Courses',
             'inbox' => 'Phishing Inbox Simulator',
             'leaderboard' => 'Leaderboard & Rankings',

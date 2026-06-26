@@ -51,6 +51,11 @@ class Module extends Model
         return $this->belongsToMany(User::class, 'user_enrollments', 'module_id', 'user_id');
     }
 
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

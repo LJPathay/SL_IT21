@@ -102,7 +102,7 @@
                         <p class="text-sm text-slate-500 font-medium">Included in your organization plan</p>
                     </div>
 
-                    <a href="{{ url('/learn/' . $id) }}" class="w-full block text-center py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mb-6">
+                    <a href="{{ url('/learn/' . $module->id) }}" class="w-full block text-center py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mb-6">
                         Enroll Now
                     </a>
                     

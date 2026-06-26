@@ -98,29 +98,49 @@ class DashboardController extends Controller
         // Get courses taught by this instructor
         $courses = $user->taughtCourses()->with('enrollments')->get();
 
-        // Get modules they can teach
-        $modules = Module::byRole('instructor')->active()->get();
+        // Get all active modules (instructors should have access to all)
+        $modules = Module::active()->get();
 
         // Get enrollments in their courses
         $enrolledStudents = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
             ->with('user')
             ->get();
 
+        // Get unique students count
+        $uniqueStudents = $enrolledStudents->pluck('user_id')->unique()->count();
+
         // Get average completion across courses
         $avgCompletion = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
             ->avg('progress_percentage') ?? 0;
 
-        // Get instructor's recent activity
-        $recentActivity = AuditLog::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
+        // Get students who need attention (failing or low progress)
+        $needsAttention = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
+            ->where('progress_percentage', '<', 50)
+            ->with('user')
+            ->get();
+
+        // Get average quiz score for students in instructor's courses
+        $avgQuizScore = QuizResult::whereIn('quiz_id', function($query) use ($courses) {
+            $query->select('id')->from('quizzes')->whereIn('module_id', function($q) use ($courses) {
+                $q->select('id')->from('modules')->whereIn('course_id', $courses->pluck('id'));
+            });
+        })->avg('score_percentage') ?? 0;
+
+        // Get recent student activity
+        $recentActivity = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
+            ->with('user')
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
             ->get();
 
         return view('instructor.dashboard', [
             'courses' => $courses,
             'modules' => $modules,
             'enrolledStudents' => $enrolledStudents,
-            'avgCompletion' => round($avgCompletion, 2),
+            'uniqueStudents' => $uniqueStudents,
+            'avgCompletion' => round($avgCompletion, 1),
+            'needsAttention' => $needsAttention,
+            'avgQuizScore' => round($avgQuizScore, 1),
             'recentActivity' => $recentActivity,
         ]);
     }
@@ -141,22 +161,25 @@ class DashboardController extends Controller
         // Get accessible modules based on role
         $accessibleModules = Module::byRole($user->role)->active()->get();
 
-        // Get user's enrolled modules
-        $enrolledModules = $user->enrolledModules()
+        // Get user's enrolled modules (in progress)
+        $inProgressModules = $user->enrolledModules()
             ->where('user_enrollments.status', 'active')
             ->get();
 
         // Get completed modules
         $completedModules = $user->enrolledModules()
             ->where('user_enrollments.status', 'completed')
-            ->get();
+            ->count();
 
         // Get recent quiz results
-        $recentQuizzes = $user->quizResults()
+        $recentQuizResults = $user->quizResults()
             ->with('quiz')
             ->latest('completed_at')
             ->limit(5)
             ->get();
+
+        // Calculate quiz average
+        $quizAverage = $user->quizResults()->avg('score_percentage') ?? 0;
 
         // Get earned certificates
         $certificates = $user->certificates()
@@ -169,15 +192,34 @@ class DashboardController extends Controller
             ->where('status', 'active')
             ->avg('progress_percentage') ?? 0;
 
+        // Calculate security score (based on quiz performance and module completion)
+        $securityScore = min(1000, round(($quizAverage * 5) + ($completedModules * 50)));
+
+        // Calculate percentile (simplified)
+        $percentile = min(99, round($securityScore / 10));
+
+        // Determine next milestone
+        $nextMilestone = match(true) {
+            $completedModules < 1 => 'Complete your first module',
+            $completedModules < 5 => 'Complete 5 modules',
+            $completedModules < 10 => 'Complete 10 modules',
+            $completedModules < 20 => 'Complete 20 modules',
+            default => 'Become a security expert'
+        };
+
         return view('student.dashboard', [
             'user' => $user,
             'enrolledCourses' => $enrolledCourses,
             'accessibleModules' => $accessibleModules,
-            'enrolledModules' => $enrolledModules,
+            'inProgressModules' => $inProgressModules,
             'completedModules' => $completedModules,
-            'recentQuizzes' => $recentQuizzes,
+            'recentQuizResults' => $recentQuizResults,
+            'quizAverage' => round($quizAverage, 1),
             'certificates' => $certificates,
             'overallProgress' => round($overallProgress, 2),
+            'securityScore' => $securityScore,
+            'percentile' => $percentile,
+            'nextMilestone' => $nextMilestone,
         ]);
     }
 
