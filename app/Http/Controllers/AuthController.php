@@ -123,6 +123,16 @@ class AuthController extends Controller
 
         // Check if MFA is enabled for this user
         if ($user->mfa_enabled) {
+            $cookieName = 'remember_mfa_' . $user->id;
+            if ($request->hasCookie($cookieName)) {
+                // Bypass MFA if browser is remembered
+                session()->forget(['captcha_question', 'captcha_answer']);
+                Auth::login($user, $request->boolean('remember'));
+                LoggingService::logSuccessfulLogin($user, $request);
+                $request->session()->regenerate();
+                return redirect()->intended(route('dashboard'))->with('success', 'Logged in successfully!');
+            }
+
             // Generate a 6-digit OTP code
             $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
             
@@ -299,6 +309,11 @@ class AuthController extends Controller
             ['email' => $user->email]
         );
 
+        // Check if remember browser is checked
+        if ($request->boolean('remember_browser')) {
+            Cookie::queue('remember_mfa_' . $user->id, 'verified', 60 * 24 * 30); // 30 days
+        }
+
         // Clear MFA session details
         session()->forget(['mfa_user_id', 'mfa_remember', 'mfa_code_demo']);
 
@@ -344,7 +359,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'student',
             'is_active' => true,
-            'mfa_enabled' => true,
+            'mfa_enabled' => false,
         ]);
 
         LoggingService::logSecurityEvent(
@@ -429,5 +444,59 @@ class AuthController extends Controller
         throw ValidationException::withMessages([
             'email' => __($status),
         ]);
+    }
+
+    /**
+     * Toggle MFA for the authenticated user.
+     */
+    public function toggleMfa(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $user->mfa_enabled = !$user->mfa_enabled;
+        $user->save();
+
+        $status = $user->mfa_enabled ? 'activated' : 'deactivated';
+
+        return back()->with('success', "Multi-Factor Authentication has been successfully {$status}!");
+    }
+
+    /**
+     * Show the user profile page.
+     */
+    public function showProfile(Request $request)
+    {
+        return view('profile.show', [
+            'user' => Auth::user()
+        ]);
+    }
+
+    /**
+     * Update the user profile settings.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name = $validated['name'];
+
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Profile updated successfully!');
     }
 }

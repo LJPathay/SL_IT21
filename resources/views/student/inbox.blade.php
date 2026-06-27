@@ -29,13 +29,42 @@
         <aside class="w-80 border-r border-slate-200 flex flex-col shrink-0">
             <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-800 text-sm flex items-center justify-between">
                 <span>Inbox</span>
-                <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">4 Emails</span>
+                <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">{{ count($simulations) + 4 }} Emails</span>
             </div>
             
             <nav class="flex-1 overflow-y-auto divide-y divide-slate-100">
                 
+                @foreach($simulations as $sim)
+                    @php
+                        $campaign = $sim->campaign;
+                        $display = '';
+                        $shortBody = '';
+                        if ($campaign->template_type === 'microsoft_login') {
+                            $display = 'Microsoft Support';
+                            $shortBody = 'Your company domain password is set to expire in 2 hours...';
+                        } elseif ($campaign->template_type === 'dhl_shipping') {
+                            $display = 'DHL Shipping Service';
+                            $shortBody = 'We were unable to deliver your package code DHL-2039-NX...';
+                        } elseif ($campaign->template_type === 'netflix_renewal') {
+                            $display = 'Netflix Billing Team';
+                            $shortBody = 'We were unable to process your monthly subscription...';
+                        } elseif ($campaign->template_type === 'payroll_update') {
+                            $display = 'HR Payroll Department';
+                            $shortBody = 'Please update your direct deposit account details before...';
+                        }
+                    @endphp
+                    <button onclick="selectEmail('sim-{{ $sim->id }}')" id="email-item-sim-{{ $sim->id }}" class="w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all @if($loop->first) bg-blue-50/20 border-l-4 border-blue-500 @endif">
+                        <div class="flex justify-between text-xs">
+                            <span class="font-bold text-slate-900">{{ $display }}</span>
+                            <span class="text-slate-400">{{ $campaign->sent_at ? $campaign->sent_at->format('g:i A') : 'Just now' }}</span>
+                        </div>
+                        <div class="text-xs font-extrabold text-slate-800 truncate">{{ $campaign->name }}</div>
+                        <div class="text-xs text-slate-400 line-clamp-2">{{ $shortBody }}</div>
+                    </button>
+                @endforeach
+                
                 <!-- Email Item 1 -->
-                <button onclick="selectEmail(1)" id="email-item-1" class="w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all bg-blue-50/20 border-l-4 border-blue-500">
+                <button onclick="selectEmail(1)" id="email-item-1" class="w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all @if($simulations->isEmpty()) bg-blue-50/20 border-l-4 border-blue-500 @endif">
                     <div class="flex justify-between text-xs">
                         <span class="font-bold text-slate-900">Microsoft IT Support</span>
                         <span class="text-slate-400">10:45 AM</span>
@@ -135,10 +164,63 @@
 
 <script>
     // State
-    let activeEmailId = 1;
+    let activeEmailId = @json($simulations->isNotEmpty() ? 'sim-' . $simulations->first()->id : '1');
     let score = 850;
 
     const emailDatabase = {
+        @foreach($simulations as $sim)
+            @php
+                $campaign = $sim->campaign;
+                $details = [];
+                if ($campaign->template_type === 'microsoft_login') {
+                    $details = [
+                        'display' => 'Microsoft Support',
+                        'email' => 'security@micros0ft-support.com',
+                        'subject' => 'URGENT: Password Expiration Notice',
+                        'body' => '<p>Dear ' . e(Auth::user()->name) . ',</p><p>We detected that your account password is scheduled to expire in <strong>2 hours</strong>. According to company policy, failure to update credentials will lock your access to all services.</p><p class="pt-2"><a href="/phishing/' . $campaign->id . '/click" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm shadow-blue-200 transition-colors">Reset Password Now</a></p><p class="text-xs text-slate-450 border-t border-slate-200/50 pt-4">This is a system-generated alert from Microsoft Admin Services. Do not reply to this email.</p>',
+                        'isPhish' => true,
+                        'tips' => 'Correct! You successfully detected the Microsoft Phishing Simulation. Red flags: Lookalike domain micros0ft-support.com (spelled with a zero) and high-urgency request.'
+                    ];
+                } elseif ($campaign->template_type === 'dhl_shipping') {
+                    $details = [
+                        'display' => 'DHL Shipping Service',
+                        'email' => 'delivery-alert@dhl-tracking-portal.net',
+                        'subject' => 'Package Unclaimed - Delayed Status',
+                        'body' => '<p>Attention Customer,</p><p>Your package code DHL-2039-NX is delayed at our sorting facility. A holding fee of <strong>$1.50</strong> is required to dispatch the item.</p><p class="pt-2"><a href="/phishing/' . $campaign->id . '/click" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm shadow-yellow-100 transition-colors">Verify Address</a></p>',
+                        'isPhish' => true,
+                        'tips' => 'Correct! You reported a Phishing Simulation. Red flags: Unofficial tracking domain dhl-tracking-portal.net, and request for credit details.'
+                    ];
+                } elseif ($campaign->template_type === 'netflix_renewal') {
+                    $details = [
+                        'display' => 'Netflix Billing Team',
+                        'email' => 'support@netflix-accounts-portal.net',
+                        'subject' => 'Action Required: Update payment method',
+                        'body' => '<p>We were unable to process your monthly subscription payment. Please update your payment method immediately to avoid service interruption.</p><p class="pt-2"><a href="/phishing/' . $campaign->id . '/click" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm transition-colors">Update Billing Info</a></p>',
+                        'isPhish' => true,
+                        'tips' => 'Correct! You reported a Netflix Simulation. Red flag: netflix-accounts-portal.net domain instead of netflix.com.'
+                    ];
+                } elseif ($campaign->template_type === 'payroll_update') {
+                    $details = [
+                        'display' => 'HR Payroll Department',
+                        'email' => 'payroll@secure-learn-portal.org',
+                        'subject' => 'URGENT: Update direct deposit details',
+                        'body' => '<p>Please update your direct deposit account details before the end of the current pay cycle to ensure your payroll is processed correctly.</p><p class="pt-2"><a href="/phishing/' . $campaign->id . '/click" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm transition-colors">Update Direct Deposit</a></p>',
+                        'isPhish' => true,
+                        'tips' => 'Correct! You reported a HR payroll Simulation. Red flag: secure-learn-portal.org instead of company internal domain.'
+                    ];
+                }
+            @endphp
+            "sim-{{ $sim->id }}": {
+                campaignId: "{{ $campaign->id }}",
+                display: "{{ $details['display'] }}",
+                email: "{{ $details['email'] }}",
+                subject: "{{ $details['subject'] }}",
+                date: "{{ $campaign->sent_at ? $campaign->sent_at->format('M d, Y H:i A') : 'Just now' }}",
+                body: `{!! $details['body'] !!}`,
+                isPhish: {{ $details['isPhish'] ? 'true' : 'false' }},
+                tips: "{{ $details['tips'] }}"
+            },
+        @endforeach
         1: {
             display: "Microsoft Support",
             email: "security@micros0ft-support.com",
@@ -197,10 +279,16 @@
 
     function selectEmail(id) {
         // Remove active class from old item
-        document.getElementById(`email-item-${activeEmailId}`).className = "w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all";
+        const oldItem = document.getElementById(`email-item-${activeEmailId}`);
+        if (oldItem) {
+            oldItem.className = "w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all";
+        }
         
         // Add active class to new item
-        document.getElementById(`email-item-${id}`).className = "w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all bg-blue-50/20 border-l-4 border-blue-500";
+        const newItem = document.getElementById(`email-item-${id}`);
+        if (newItem) {
+            newItem.className = "w-full text-left p-4 hover:bg-slate-50/50 flex flex-col gap-1 transition-all bg-blue-50/20 border-l-4 border-blue-500";
+        }
         
         // Load data
         activeEmailId = id;
@@ -220,6 +308,35 @@
         const email = emailDatabase[activeEmailId];
 
         feedback.classList.remove('hidden', 'bg-green-50', 'border-green-150', 'text-green-800', 'bg-red-50', 'border-red-150', 'text-red-800');
+
+        if (typeof activeEmailId === 'string' && activeEmailId.startsWith('sim-')) {
+            if (reportedPhish) {
+                // Send AJAX report
+                fetch(`/phishing/${email.campaignId}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        score += 100;
+                        feedback.classList.add('bg-green-50', 'border-green-150', 'text-green-800');
+                        text.innerHTML = `🌟 **Correct! (+100 pts)** ${email.tips}`;
+                        scoreLabel.innerText = score;
+                    }
+                });
+            } else {
+                score = Math.max(0, score - 50);
+                feedback.classList.add('bg-red-50', 'border-red-150', 'text-red-800');
+                text.innerHTML = `🚨 **Danger! (-50 pts)** You marked a malicious campaign email as safe. Remember to audit domains carefully!`;
+                scoreLabel.innerText = score;
+            }
+            feedback.classList.add('opacity-100');
+            return;
+        }
 
         if (reportedPhish) {
             // Action is reporting phish
@@ -252,5 +369,10 @@
         scoreLabel.innerText = score;
         feedback.classList.add('opacity-100');
     }
+
+    // Initialize select first email on load
+    document.addEventListener("DOMContentLoaded", () => {
+        selectEmail(activeEmailId);
+    });
 </script>
 @endsection

@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('SecurePassword123!'),
                 'role' => 'admin',
                 'is_active' => true,
-                'mfa_enabled' => true,
+                'mfa_enabled' => false,
             ]
         );
 
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('SecurePassword123!'),
                 'role' => 'instructor',
                 'is_active' => true,
-                'mfa_enabled' => true,
+                'mfa_enabled' => false,
             ]
         );
 
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('SecurePassword123!'),
                 'role' => 'student',
                 'is_active' => true,
-                'mfa_enabled' => true,
+                'mfa_enabled' => false,
             ]
         );
     }

@@ -30,6 +30,7 @@
             ['title' => 'Reports', 'url' => url('/admin/reports'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'reports'],
             ['title' => 'Audit Logs', 'url' => url('/admin/audit-logs'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'audit-logs'],
             ['title' => 'Security Logs', 'url' => url('/admin/security-logs'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'security-logs'],
+            ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     } elseif ($user->isInstructor()) {
         $navItems = [
@@ -37,6 +38,7 @@
             ['title' => 'My Courses', 'url' => url('/instructor/courses'), 'icon' => 'courses', 'active' => $segment === 'instructor' && $subSegment === 'courses'],
             ['title' => 'My Students', 'url' => url('/instructor/students'), 'icon' => 'students', 'active' => $segment === 'instructor' && $subSegment === 'students'],
             ['title' => 'Assessment Results', 'url' => url('/instructor/assessments'), 'icon' => 'assessments', 'active' => $segment === 'instructor' && $subSegment === 'assessments'],
+            ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     } else { // Student
         $navItems = [
@@ -45,6 +47,7 @@
             ['title' => 'My Courses', 'url' => url('/student/courses'), 'icon' => 'courses', 'active' => $segment === 'student' && $subSegment === 'courses'],
             ['title' => 'Quizzes & Exams', 'url' => url('/student/quizzes'), 'icon' => 'quizzes', 'active' => $segment === 'student' && $subSegment === 'quizzes'],
             ['title' => 'My Certificates', 'url' => url('/student/certificates'), 'icon' => 'certificates', 'active' => $segment === 'student' && $subSegment === 'certificates'],
+            ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     }
 @endphp

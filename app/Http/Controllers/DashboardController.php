@@ -509,11 +509,18 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Student inbox page (email simulator).
-     */
     public function studentInbox(Request $request)
     {
-        return view('student.inbox');
+        $user = Auth::user();
+        $simulations = \App\Models\PhishingResult::where('user_id', $user->id)
+            ->with('campaign')
+            ->whereHas('campaign', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->get();
+
+        return view('student.inbox', [
+            'simulations' => $simulations,
+        ]);
     }
 }

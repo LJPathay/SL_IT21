@@ -35,6 +35,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth')->name('auth.refresh');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/security/mfa/toggle', [AuthController::class, 'toggleMfa'])->name('security.mfa.toggle');
+    Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile.show');
+    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/profile/mfa/setup', [AuthController::class, 'setupMfa'])->name('profile.mfa.setup');
+    Route::post('/profile/mfa/confirm', [AuthController::class, 'confirmMfa'])->name('profile.mfa.confirm');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Admin routes

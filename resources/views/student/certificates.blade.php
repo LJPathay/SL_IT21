@@ -33,7 +33,11 @@
                 </div>
             </div>
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                <button onclick="toggleCertModal(true)" class="w-full text-center py-2 bg-white border border-blue-200 text-blue-700 font-bold rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs">
+                <button onclick="toggleCertModal(true, {
+                    recipient: '{{ addslashes($cert->user->name) }}',
+                    module: '{{ addslashes($cert->module->title ?? 'Certificate') }}',
+                    credential_id: '{{ $cert->credential_id ?? $cert->certificate_number }}'
+                })" class="w-full text-center py-2 bg-white border border-blue-200 text-blue-700 font-bold rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs">
                     View Certificate
                 </button>
             </div>
@@ -72,12 +76,12 @@
                 <div class="space-y-2">
                     <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Certificate of Completion</div>
                     <div class="text-sm font-semibold text-slate-600 italic">This is proudly presented to</div>
-                    <div class="text-3xl font-extrabold text-slate-900 border-b border-slate-200 pb-2 max-w-md mx-auto leading-relaxed">Lebron James Pathay</div>
+                    <div id="cert-recipient-name" class="text-3xl font-extrabold text-slate-900 border-b border-slate-200 pb-2 max-w-md mx-auto leading-relaxed">Lebron James Pathay</div>
                 </div>
 
                 <div class="space-y-4 max-w-lg mx-auto">
                     <p class="text-slate-600 text-sm leading-relaxed">For demonstrating outstanding knowledge and competency in database defenses by passing all criteria, lessons, and quizzes in the curriculum</p>
-                    <p class="text-lg font-black text-blue-600">SQL Injection Prevention</p>
+                    <p id="cert-module-title" class="text-lg font-black text-blue-600">SQL Injection Prevention</p>
                 </div>
 
                 <!-- Signatures and seal layout -->
@@ -92,7 +96,7 @@
                     <!-- Center Seal -->
                     <div class="flex items-center justify-center">
                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white flex flex-col items-center justify-center font-bold shadow-md relative border-4 border-white select-none">
-                            <span class="text-[8px] uppercase tracking-wider font-extrabold">Passed</span>
+                             <span class="text-[8px] uppercase tracking-wider font-extrabold">Passed</span>
                             <span class="text-xs">✔</span>
                             <div class="absolute -inset-1 rounded-full border border-yellow-500/30"></div>
                         </div>
@@ -100,14 +104,14 @@
 
                     <!-- Right Signature -->
                     <div class="text-center space-y-1">
-                        <div class="font-serif italic text-sm text-slate-800 border-b border-slate-200 pb-1 w-32 mx-auto">Lebron J. Pathay</div>
+                        <div id="cert-recipient-signature" class="font-serif italic text-sm text-slate-800 border-b border-slate-200 pb-1 w-32 mx-auto">Lebron J. Pathay</div>
                         <div class="text-[9px] font-bold text-slate-400 uppercase">Recipient Signature</div>
                     </div>
                 </div>
 
                 <!-- Bottom Credential info -->
                 <div class="text-[10px] text-slate-400 font-bold pt-4">
-                    Verify at: <span class="font-mono text-slate-500 underline select-all">securelearn.org/verify/SL-10384-SQL</span>
+                    Verify at: <span id="cert-verification-link" class="font-mono text-slate-500 underline select-all">securelearn.org/verify/SL-10384-SQL</span>
                 </div>
             </div>
 
@@ -126,10 +130,15 @@
 </div>
 
 <script>
-    function toggleCertModal(show) {
+    function toggleCertModal(show, data = null) {
         const backdrop = document.getElementById('cert-modal-backdrop');
         const modal = document.getElementById('cert-modal');
-        if (show) {
+        if (show && data) {
+            document.getElementById('cert-recipient-name').innerText = data.recipient;
+            document.getElementById('cert-module-title').innerText = data.module;
+            document.getElementById('cert-recipient-signature').innerText = data.recipient;
+            document.getElementById('cert-verification-link').innerText = 'securelearn.org/verify/' + data.credential_id;
+
             backdrop.classList.remove('pointer-events-none', 'opacity-0');
             backdrop.classList.add('opacity-100');
             modal.classList.remove('scale-90');
