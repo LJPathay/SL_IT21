@@ -86,6 +86,10 @@
             @endforelse
 
         </div>
+        
+        {{ $quizzes->links() }}
+
+        </div>
 
         <!-- Right column: Quiz Settings & Rules -->
         <div class="space-y-6">

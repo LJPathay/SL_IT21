@@ -21,25 +21,27 @@
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         
         <!-- Filter Row -->
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <form method="GET" action="{{ route('instructor.students') }}" class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="relative max-w-xs w-full">
                 <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <input type="text" placeholder="Search student name..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-250 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search student name..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-250 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
             
             <div class="flex items-center gap-3">
-                <select class="bg-white border border-slate-250 rounded-xl px-3 py-2 text-sm text-slate-655 outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="all">All Progress Levels</option>
-                    <option value="completed">Completed (100%)</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="struggling">Struggling (<70% Score)</option>
+                <select name="progress" class="bg-white border border-slate-250 rounded-xl px-3 py-2 text-sm text-slate-655 outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Progress Levels</option>
+                    <option value="completed" {{ request('progress') === 'completed' ? 'selected' : '' }}>Completed (100%)</option>
+                    <option value="in-progress" {{ request('progress') === 'in-progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="struggling" {{ request('progress') === 'struggling' ? 'selected' : '' }}>Struggling (<70% Score)</option>
                 </select>
-                <button onclick="alert('Exporting student data...')" class="bg-white border border-slate-250 hover:bg-slate-50 text-slate-655 text-sm px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-colors">
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm">Filter</button>
+                <a href="{{ route('instructor.students') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm">Clear</a>
+                <button type="button" onclick="alert('Exporting student data...')" class="bg-white border border-slate-250 hover:bg-slate-50 text-slate-655 text-sm px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Export
                 </button>
             </div>
-        </div>
+        </form>
 
         <!-- Table -->
         <div class="overflow-x-auto">
@@ -93,6 +95,8 @@
                 </tbody>
             </table>
         </div>
+        
+        {{ $students->links() }}
     </div>
 
     <!-- DIRECT MESSAGE MODAL -->

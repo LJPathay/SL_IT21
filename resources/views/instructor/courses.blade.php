@@ -61,6 +61,8 @@
         </div>
         @endforelse
     </div>
+    
+    {{ $courses->links() }}
 
 </div>
 @endsection

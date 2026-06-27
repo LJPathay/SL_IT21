@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use PragmaRX\Google2FA\Google2FA;
 
 class AuthController extends Controller
 {
@@ -133,23 +134,14 @@ class AuthController extends Controller
                 return redirect()->intended(route('dashboard'))->with('success', 'Logged in successfully!');
             }
 
-            // Generate a 6-digit OTP code
-            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-            
-            // Save OTP and expiration time (10 minutes)
-            $user->mfa_secret = $otp; // store in raw/hash format. Let's store raw for simplicity of this demo, or Hash::make. Let's store raw so we can easily check, or Hash::make for maximum security. Raw is fine for temporary OTPs if we clear it.
-            $user->mfa_expires_at = now()->addMinutes(10);
-            $user->save();
-
-            // Store user ID in session temporarily
+            // Store user ID in session temporarily for MFA verification
             session([
                 'mfa_user_id' => $user->id,
                 'mfa_remember' => $request->boolean('remember'),
-                'mfa_code_demo' => $otp // Storing in session for display purposes in the UI helper/banner
             ]);
 
             LoggingService::logSecurityEvent(
-                'mfa_otp_generated',
+                'mfa_challenge_required',
                 'info',
                 $user,
                 $request,
@@ -249,7 +241,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Verify the MFA code.
+     * Verify the MFA code using TOTP.
      */
     public function verifyMfa(Request $request)
     {
@@ -271,7 +263,27 @@ class AuthController extends Controller
         $userId = session('mfa_user_id');
         $user = User::find($userId);
 
-        if (!$user || !$user->mfa_secret || $user->mfa_secret !== $request->code || now()->greaterThan($user->mfa_expires_at)) {
+        if (!$user || !$user->mfa_secret) {
+            LoggingService::logSecurityEvent(
+                'failed_mfa_attempt',
+                'warning',
+                $user,
+                $request,
+                '/login/mfa',
+                422,
+                ['reason' => 'User not found or MFA not enabled']
+            );
+
+            throw ValidationException::withMessages([
+                'code' => 'Invalid verification code.',
+            ]);
+        }
+
+        $google2fa = new Google2FA();
+        $secret = decrypt($user->mfa_secret);
+        $valid = $google2fa->verifyKey($secret, $request->code);
+
+        if (!$valid) {
             LoggingService::logSecurityEvent(
                 'failed_mfa_attempt',
                 'warning',
@@ -283,16 +295,11 @@ class AuthController extends Controller
             );
 
             throw ValidationException::withMessages([
-                'code' => 'Invalid or expired verification code.',
+                'code' => 'Invalid verification code.',
             ]);
         }
 
-        // Clear MFA code from database
-        $user->mfa_secret = null;
-        $user->mfa_expires_at = null;
-        $user->save();
-
-        // Clear captcha session too
+        // Clear captcha session
         session()->forget(['captcha_question', 'captcha_answer']);
 
         // Log the user in
@@ -315,7 +322,7 @@ class AuthController extends Controller
         }
 
         // Clear MFA session details
-        session()->forget(['mfa_user_id', 'mfa_remember', 'mfa_code_demo']);
+        session()->forget(['mfa_user_id', 'mfa_remember']);
 
         // Regenerate session ID for security
         $request->session()->regenerate();
@@ -456,12 +463,104 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        $user->mfa_enabled = !$user->mfa_enabled;
+        // If enabling MFA, redirect to setup page
+        if (!$user->mfa_enabled) {
+            return redirect()->route('profile.mfa.setup');
+        }
+
+        // If disabling MFA, just disable it
+        $user->mfa_enabled = false;
+        $user->mfa_secret = null;
         $user->save();
 
-        $status = $user->mfa_enabled ? 'activated' : 'deactivated';
+        return back()->with('success', "Multi-Factor Authentication has been successfully deactivated!");
+    }
 
-        return back()->with('success', "Multi-Factor Authentication has been successfully {$status}!");
+    /**
+     * Show MFA setup page with QR code.
+     */
+    public function setupMfa(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if ($user->mfa_enabled) {
+            return redirect()->route('profile.show')->with('info', 'MFA is already enabled.');
+        }
+
+        $google2fa = new Google2FA();
+        
+        // Generate a new secret key
+        $secret = $google2fa->generateSecretKey();
+        
+        // Store the secret temporarily in session for verification
+        session(['mfa_setup_secret' => $secret]);
+        
+        // Generate QR code URL
+        $companyName = config('app.name', 'SecureLearn');
+        $email = $user->email;
+        $qrCodeUrl = $google2fa->getQRCodeUrl($companyName, $email, $secret);
+        
+        // Use Google Charts API for QR code generation (simple and reliable)
+        $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrCodeUrl);
+
+        return view('profile.mfa-setup', [
+            'qrCodeImageUrl' => $qrCodeImageUrl,
+            'secret' => $secret,
+        ]);
+    }
+
+    /**
+     * Confirm and enable MFA after verification.
+     */
+    public function confirmMfa(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ], [
+            'code.required' => 'Verification code is required.',
+            'code.size' => 'Verification code must be exactly 6 digits.',
+        ]);
+
+        $secret = session('mfa_setup_secret');
+        
+        if (!$secret) {
+            return redirect()->route('profile.show')->with('error', 'MFA setup session expired. Please try again.');
+        }
+
+        $google2fa = new Google2FA();
+        $valid = $google2fa->verifyKey($secret, $request->code);
+
+        if (!$valid) {
+            return back()->withErrors(['code' => 'Invalid verification code. Please try again.']);
+        }
+
+        // Enable MFA for the user
+        $user->mfa_enabled = true;
+        $user->mfa_secret = encrypt($secret);
+        $user->save();
+
+        // Clear the temporary secret from session
+        session()->forget('mfa_setup_secret');
+
+        LoggingService::logSecurityEvent(
+            'mfa_enabled',
+            'info',
+            $user,
+            $request,
+            '/profile/mfa/setup',
+            200,
+            ['email' => $user->email]
+        );
+
+        return redirect()->route('profile.show')->with('success', 'Multi-Factor Authentication has been successfully enabled!');
     }
 
     /**

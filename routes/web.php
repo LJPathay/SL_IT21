@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
 
         // Phishing simulation routes
+        Route::get('/admin/phishing', [PhishingController::class, 'index'])->name('admin.phishing');
         Route::post('/admin/phishing', [PhishingController::class, 'store'])->name('admin.phishing.store');
         Route::post('/admin/phishing/{campaign}/launch', [PhishingController::class, 'launch'])->name('admin.phishing.launch');
         Route::post('/admin/phishing/{campaign}/complete', [PhishingController::class, 'complete'])->name('admin.phishing.complete');

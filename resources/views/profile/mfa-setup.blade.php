@@ -31,7 +31,7 @@
             <div class="flex flex-col md:flex-row gap-8 items-center">
                 <!-- QR Code -->
                 <div class="shrink-0 p-4 bg-white border-2 border-slate-200 rounded-2xl shadow-inner">
-                    {!! $qrCodeSvg !!}
+                    <img src="{{ $qrCodeImageUrl }}" alt="MFA QR Code" class="w-48 h-48">
                 </div>
 
                 <div class="flex-1 space-y-4">

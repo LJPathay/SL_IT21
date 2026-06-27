@@ -52,6 +52,8 @@
         </div>
         @endforelse
     </div>
+    
+    {{ $certificates->links() }}
 
     <!-- CERTIFICATE PRINT MODAL DIALOG -->
     <div id="cert-modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none" onclick="toggleCertModal(false)">

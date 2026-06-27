@@ -19,10 +19,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 md:h-20">
                 <a href="{{ url('/') }}" class="flex items-center gap-2">
-                    <span class="text-blue-600">
-                        <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    </span>
-                    <span class="font-bold text-xl md:text-2xl tracking-tight text-slate-900">SecureLearn</span>
+                    <div class="bg-blue-600 rounded-xl p-4 shadow-md">
+                        <img src="{{ asset('img/logo.png') }}" alt="SecureLearn Logo" class="w-24 h-24 md:w-32 md:h-32">
+                    </div>
                 </a>
 
                 <!-- Desktop Nav -->

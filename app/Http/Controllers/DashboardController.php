@@ -253,7 +253,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        $auditLogs = $query->orderBy('created_at', 'desc')->paginate(50);
+        $auditLogs = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('admin.audit-logs', [
             'auditLogs' => $auditLogs,
@@ -295,7 +295,7 @@ class DashboardController extends Controller
             $query->where('severity', 'critical');
         }
 
-        $securityLogs = $query->orderBy('occurred_at', 'desc')->paginate(50);
+        $securityLogs = $query->orderBy('occurred_at', 'desc')->paginate(10);
 
         return view('admin.security-logs', [
             'securityLogs' => $securityLogs,
@@ -307,7 +307,7 @@ class DashboardController extends Controller
      */
     public function adminCourses(Request $request)
     {
-        $courses = Course::with('instructor', 'modules')->orderBy('title')->get();
+        $courses = Course::with('instructor', 'modules')->orderBy('title')->paginate(10);
 
         return view('admin.courses', [
             'courses' => $courses,
@@ -319,11 +319,11 @@ class DashboardController extends Controller
      */
     public function adminModules(Request $request)
     {
-        $modules = Module::with('course')->orderBy('title')->get();
-        $totalModules = $modules->count();
-        $activeModules = $modules->where('is_active', true)->count();
-        $inactiveModules = $modules->where('is_active', false)->count();
-        $totalEnrollments = $modules->sum('enrollment_count');
+        $modules = Module::with('course')->orderBy('title')->paginate(10);
+        $totalModules = Module::count();
+        $activeModules = Module::where('is_active', true)->count();
+        $inactiveModules = Module::where('is_active', false)->count();
+        $totalEnrollments = UserEnrollment::count();
 
         return view('admin.modules', [
             'modules' => $modules,
@@ -345,6 +345,14 @@ class DashboardController extends Controller
             $query->where('role', $request->role);
         }
 
+        if ($request->status) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -352,7 +360,7 @@ class DashboardController extends Controller
             });
         }
 
-        $users = $query->orderBy('name')->paginate(20);
+        $users = $query->orderBy('name')->paginate(10);
 
         return view('admin.users', [
             'users' => $users,
@@ -364,11 +372,9 @@ class DashboardController extends Controller
      */
     public function adminQuizzes(Request $request)
     {
-        $quizzes = Quiz::with('module')->orderBy('title')->get();
-        $totalQuizzes = $quizzes->count();
-        $totalQuestions = $quizzes->sum(function ($quiz) {
-            return $quiz->questions ? $quiz->questions->count() : 0;
-        });
+        $quizzes = Quiz::with('module')->orderBy('title')->paginate(10);
+        $totalQuizzes = Quiz::count();
+        $totalQuestions = Quiz::withCount('questions')->get()->sum('questions_count');
 
         return view('admin.quizzes', [
             'quizzes' => $quizzes,
@@ -406,7 +412,7 @@ class DashboardController extends Controller
     public function instructorCourses(Request $request)
     {
         $user = Auth::user();
-        $courses = $user->taughtCourses()->with('modules')->get();
+        $courses = $user->taughtCourses()->with('modules')->paginate(10);
 
         return view('instructor.courses', [
             'courses' => $courses,
@@ -420,10 +426,30 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $courses = $user->taughtCourses();
-        $students = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
+        $query = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
             ->with('user')
-            ->where('status', 'active')
-            ->get();
+            ->where('status', 'active');
+
+        // Search filter
+        if ($request->search) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Progress filter
+        if ($request->progress) {
+            if ($request->progress === 'completed') {
+                $query->where('progress_percentage', 100);
+            } elseif ($request->progress === 'in-progress') {
+                $query->where('progress_percentage', '>', 0)->where('progress_percentage', '<', 100);
+            } elseif ($request->progress === 'struggling') {
+                $query->where('progress_percentage', '<', 70);
+            }
+        }
+
+        $students = $query->paginate(10);
 
         return view('instructor.students', [
             'students' => $students,
@@ -442,7 +468,7 @@ class DashboardController extends Controller
         $quizResults = QuizResult::whereIn('quiz_id', $quizIds)
             ->with(['user', 'quiz'])
             ->latest('completed_at')
-            ->get();
+            ->paginate(10);
 
         return view('instructor.assessments', [
             'quizResults' => $quizResults,
@@ -458,7 +484,7 @@ class DashboardController extends Controller
         $enrolledCourses = $user->enrolledCourses()
             ->with('instructor')
             ->where('user_enrollments.status', 'active')
-            ->get();
+            ->paginate(10);
 
         return view('student.courses', [
             'enrolledCourses' => $enrolledCourses,
@@ -474,12 +500,13 @@ class DashboardController extends Controller
         $completedQuizzes = $user->quizResults()
             ->with('quiz')
             ->latest('completed_at')
-            ->get();
+            ->paginate(10);
 
+        $completedQuizIds = $completedQuizzes->pluck('quiz_id');
         $availableQuizzes = Quiz::whereHas('module', function ($query) use ($user) {
             $query->whereJsonContains('required_roles', $user->role)
                   ->orWhereNull('required_roles');
-        })->whereNotIn('id', $completedQuizzes->pluck('quiz_id'))
+        })->whereNotIn('id', $completedQuizIds)
             ->get();
 
         return view('student.quizzes', [
@@ -502,7 +529,7 @@ class DashboardController extends Controller
                 $query->where('expires_at', '>', now())
                       ->orWhereNull('expires_at');
             })
-            ->get();
+            ->paginate(10);
 
         return view('student.certificates', [
             'certificates' => $certificates,

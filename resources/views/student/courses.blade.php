@@ -57,6 +57,8 @@
             </div>
             @endforelse
         </div>
+        
+        {{ $enrolledCourses->links() }}
 
     </div>
 

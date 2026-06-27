@@ -80,6 +80,8 @@
             </div>
             @endif
         </div>
+        
+        {{ $completedQuizzes->links() }}
     </div>
 
 </div>

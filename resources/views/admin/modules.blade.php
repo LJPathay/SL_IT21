@@ -132,6 +132,8 @@
                 </tbody>
             </table>
         </div>
+        
+        {{ $modules->links() }}
     </div>
 
     <!-- CREATE DRAWER DIALOG (SLIDE-OVER) -->

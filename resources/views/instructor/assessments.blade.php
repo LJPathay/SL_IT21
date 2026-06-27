@@ -111,6 +111,8 @@
                 </tbody>
             </table>
         </div>
+        
+        {{ $quizResults->links() }}
     </div>
 
     <!-- Curriculum Weaknesses analysis -->
