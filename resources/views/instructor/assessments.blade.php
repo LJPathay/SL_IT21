@@ -11,10 +11,10 @@
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Assessment Gradebook</h2>
             <p class="text-slate-500 text-sm">Review quiz grade results, passing statistics, and identify topic weaknesses.</p>
         </div>
-        <button onclick="alert('Exporting grade sheets...')" class="bg-white border border-slate-350 hover:bg-slate-50 text-slate-700 text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors shrink-0 flex items-center gap-1.5">
+        <a href="{{ route('instructor.assessments.export') }}" class="bg-white border border-slate-350 hover:bg-slate-50 text-slate-700 text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors shrink-0 flex items-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             Export Grades
-        </button>
+        </a>
     </div>
 
     <!-- Overview stats grid -->
@@ -24,11 +24,11 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Overall Pass Rate</h4>
             <div class="flex items-center gap-4">
-                <div class="text-4xl font-black text-green-600">89.4%</div>
-                <div class="text-xs font-semibold text-slate-450 leading-relaxed">127 out of 142 students have met the passing threshold.</div>
+                <div class="text-4xl font-black text-green-600">{{ $passRate }}%</div>
+                <div class="text-xs font-semibold text-slate-450 leading-relaxed">{{ $passedResults }} out of {{ $totalResults }} students have met the passing threshold.</div>
             </div>
             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div class="bg-green-500 h-full rounded-full" style="width: 89.4%"></div>
+                <div class="bg-green-500 h-full rounded-full" style="width: {{ $passRate }}%"></div>
             </div>
         </div>
 
@@ -36,11 +36,11 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Avg Attempts to Pass</h4>
             <div class="flex items-center gap-4">
-                <div class="text-4xl font-black text-blue-600">1.6</div>
-                <div class="text-xs font-semibold text-slate-450 leading-relaxed">Students are mastering the concepts within two attempts.</div>
+                <div class="text-4xl font-black text-blue-600">{{ $avgAttempts }}</div>
+                <div class="text-xs font-semibold text-slate-450 leading-relaxed">Students are mastering the concepts within {{ round($avgAttempts) }} attempts.</div>
             </div>
             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div class="bg-blue-600 h-full rounded-full" style="width: 60%"></div>
+                <div class="bg-blue-600 h-full rounded-full" style="width: {{ min($avgAttempts * 30, 100) }}%"></div>
             </div>
         </div>
 
@@ -48,11 +48,11 @@
         <div class="bg-red-50/20 p-5 rounded-2xl border border-red-100 shadow-sm space-y-4">
             <h4 class="font-bold text-red-800 text-sm uppercase tracking-wider">Attention Required</h4>
             <div class="flex items-center gap-4">
-                <div class="text-4xl font-black text-red-600">8</div>
+                <div class="text-4xl font-black text-red-600">{{ $attentionRequired }}</div>
                 <div class="text-xs font-semibold text-red-700 leading-relaxed">Students failed the quiz on their third attempt.</div>
             </div>
             <div class="w-full bg-red-100 h-2 rounded-full overflow-hidden">
-                <div class="bg-red-500 h-full rounded-full" style="width: 30%"></div>
+                <div class="bg-red-500 h-full rounded-full" style="width: {{ min($attentionRequired * 10, 100) }}%"></div>
             </div>
         </div>
 

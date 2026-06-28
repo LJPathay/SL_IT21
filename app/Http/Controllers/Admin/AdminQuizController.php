@@ -128,6 +128,10 @@ class AdminQuizController extends Controller
             'module_id' => 'required|exists:modules,id',
             'passing_score' => 'required|integer|min:0|max:100',
             'time_limit_minutes' => 'nullable|integer|min:1|max:180',
+            'question_distribution' => 'nullable|in:sequential,randomized',
+            'attempts_allowed' => 'nullable|integer|min:0',
+            'show_correct_answers' => 'nullable|in:never,after_submission,immediately',
+            'shuffle_options' => 'boolean',
             'is_active' => 'boolean',
         ], [
             'title.required' => 'Quiz title is required.',
@@ -137,7 +141,7 @@ class AdminQuizController extends Controller
             'passing_score.max' => 'Passing score cannot exceed 100.',
         ]);
 
-        $changes = array_diff_assoc($validated, $quiz->only(['title', 'description', 'module_id', 'passing_score', 'time_limit_minutes']));
+        $changes = array_diff_assoc($validated, $quiz->only(['title', 'description', 'module_id', 'passing_score', 'time_limit_minutes', 'question_distribution', 'attempts_allowed', 'show_correct_answers', 'shuffle_options']));
         $changes['is_active'] = $request->has('is_active') !== $quiz->is_active;
 
         $quiz->update([
@@ -147,6 +151,10 @@ class AdminQuizController extends Controller
             'course_id' => Module::find($validated['module_id'])->course_id ?? null,
             'passing_score' => $validated['passing_score'],
             'time_limit_minutes' => $validated['time_limit_minutes'] ?? null,
+            'question_distribution' => $validated['question_distribution'] ?? 'sequential',
+            'attempts_allowed' => $validated['attempts_allowed'] ?? 0,
+            'show_correct_answers' => $validated['show_correct_answers'] ?? 'after_submission',
+            'shuffle_options' => $request->has('shuffle_options'),
             'is_active' => $request->has('is_active'),
         ]);
 

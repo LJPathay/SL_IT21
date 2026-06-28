@@ -69,9 +69,15 @@
                         </div>
 
                         <div class="mt-6">
-                            <a href="{{ route('modules.show', $module) }}" class="block w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium rounded-lg transition-colors text-center">
-                                Continue Learning
-                            </a>
+                            @if($module->lessons && $module->lessons->count() > 0)
+                                <a href="{{ route('lessons.show', [$module, $module->lessons->first()]) }}" class="block w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium rounded-lg transition-colors text-center">
+                                    Continue Learning
+                                </a>
+                            @else
+                                <a href="{{ route('modules.show', $module) }}" class="block w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium rounded-lg transition-colors text-center">
+                                    View Details
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>

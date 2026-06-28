@@ -57,24 +57,22 @@
             <h3 class="font-bold text-slate-800 text-lg">Quiz Directory</h3>
 
             @forelse($quizzes as $quiz)
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:border-blue-300 transition-colors">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
                     <div>
                         <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span class="px-2.5 py-0.5 bg-green-150/60 text-green-700 text-xs font-semibold rounded-md">{{ $quiz->module->category ?? 'General' }}</span>
-                            <span class="text-xs text-slate-450">Pass rate: 80%</span>
+                            <span class="text-xs text-slate-450">Pass rate: {{ $quiz->passing_score ?? 80 }}%</span>
                         </div>
                         <h4 class="font-bold text-slate-900 text-lg">{{ $quiz->title }}</h4>
-                        <p class="text-slate-500 text-xs mt-0.5">Linked to "{{ $quiz->module->title ?? 'Unknown' }}" module. Passing requirement: 80%</p>
+                        <p class="text-slate-500 text-xs mt-0.5">Linked to "{{ $quiz->module->title ?? 'Unknown' }}" module. Passing requirement: {{ $quiz->passing_score ?? 80 }}%</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">{{ $quiz->questions ? $quiz->questions->count() : 0 }} Questions</span>
-                        <button class="p-2 text-slate-455 hover:text-blue-600 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
+                        <svg class="w-5 h-5 text-slate-455" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </div>
-            </div>
+            </a>
             @empty
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
                 <div class="flex flex-col items-center gap-3">
@@ -139,48 +137,46 @@
                 </button>
             </div>
             
-            <form class="p-6 space-y-4" onsubmit="event.preventDefault(); alert('Mockup question added successfully!'); toggleQuizModal(false);">
+            <form method="POST" action="{{ route('admin.quizzes.store') }}" class="p-6 space-y-4">
+                @csrf
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Target Training Module</label>
-                    <select class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" required>
-                        <option value="sql">SQL Injection Prevention</option>
-                        <option value="phishing">Phishing Detection Awareness</option>
-                        <option value="passwords">Password Security Assessment</option>
+                    <select name="module_id" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" required>
+                        @foreach($modules ?? [] as $module)
+                        <option value="{{ $module->id }}">{{ $module->title }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Question text</label>
-                    <textarea rows="3" placeholder="Enter the question query details here..." required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Quiz Title</label>
+                    <input name="title" type="text" placeholder="e.g. SQL Injection Assessment" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                 </div>
 
-                <div class="space-y-3">
-                    <label class="block text-sm font-semibold text-slate-700">Answer Options & Correct Indicator</label>
-                    
-                    <div class="flex items-center gap-2">
-                        <input type="radio" name="correct" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-350 shrink-0">
-                        <input type="text" placeholder="Option A (Correct Answer)" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50/50">
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                    <textarea name="description" rows="2" placeholder="Brief description of this quiz..." class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                </div>
 
-                    <div class="flex items-center gap-2">
-                        <input type="radio" name="correct" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-350 shrink-0">
-                        <input type="text" placeholder="Option B" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50/50">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Passing Score (%)</label>
+                        <input name="passing_score" type="number" min="0" max="100" value="80" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Time Limit (Minutes, Optional)</label>
+                        <input name="time_limit_minutes" type="number" min="1" max="180" placeholder="e.g. 30" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                </div>
 
-                    <div class="flex items-center gap-2">
-                        <input type="radio" name="correct" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-350 shrink-0">
-                        <input type="text" placeholder="Option C" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50/50">
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <input type="radio" name="correct" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-350 shrink-0">
-                        <input type="text" placeholder="Option D" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50/50">
-                    </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="is_active" id="quiz_active" class="rounded text-blue-600">
+                    <label for="quiz_active" class="text-sm font-semibold text-slate-700">Publish immediately</label>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4">
                     <button type="button" onclick="toggleQuizModal(false)" class="px-4 py-2.5 border border-slate-250 rounded-xl text-slate-650 hover:bg-slate-50 text-sm font-semibold">Cancel</button>
-                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Save Question</button>
+                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Create Quiz</button>
                 </div>
             </form>
         </div>

@@ -44,7 +44,11 @@
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                    <a href="{{ url('/modules/' . $course->id) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">Continue Learning</a>
+                    @if($course->lessons && $course->lessons->count() > 0)
+                        <a href="{{ route('lessons.show', [$course, $course->lessons->first()]) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">Continue Learning</a>
+                    @else
+                        <span class="px-4 py-2 text-slate-400 text-sm">No lessons available</span>
+                    @endif
                 </div>
             </div>
             @empty

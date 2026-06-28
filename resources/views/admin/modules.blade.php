@@ -102,19 +102,19 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                @if($module->is_active)
-                                <a href="{{ url('/modules/' . $module->id) }}" target="_blank" class="p-1 text-slate-400 hover:text-blue-600 transition-colors" title="View details page">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-                                @else
-                                <a href="#" class="p-1 text-slate-300 cursor-not-allowed">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                </a>
-                                @endif
-                                <button class="p-1 text-slate-400 hover:text-slate-600 transition-colors" title="Edit course settings">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.modules.edit', $module) }}" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+                                <form method="POST" action="{{ route('admin.modules.toggle-status', $module) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-xs {{ $module->is_active ? 'bg-orange-50 text-orange-700 hover:bg-orange-100' : 'bg-green-50 text-green-700 hover:bg-green-100' }} font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                                        {{ $module->is_active ? 'Draft' : 'Publish' }}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.modules.destroy', $module) }}" class="inline" onsubmit="return confirm('Are you sure you want to archive this module?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs bg-slate-50 text-slate-700 hover:bg-slate-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Archive</button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -149,48 +149,87 @@
                 </button>
             </div>
             
-            <form class="flex-1 overflow-y-auto p-6 space-y-5" onsubmit="event.preventDefault(); alert('Mockup module created successfully!'); toggleCreateDrawer(false);">
+            <form method="POST" action="{{ route('admin.modules.store') }}" class="flex-1 overflow-y-auto p-6 space-y-5">
+                @csrf
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Module Name</label>
-                    <input type="text" placeholder="e.g. Cross-Site Scripting (XSS) Mitigation" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    <input name="title" type="text" placeholder="e.g. Cross-Site Scripting (XSS) Mitigation" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Category</label>
-                    <select class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
-                        <option value="web-security">Web Security</option>
-                        <option value="social-eng">Social Engineering</option>
-                        <option value="malware">Malware</option>
-                        <option value="auth-access">Authentication & Access Control</option>
+                    <select name="category" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                        <option value="Security Awareness">Security Awareness</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="Compliance">Compliance</option>
+                        <option value="IT Security">IT Security</option>
                     </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Duration (Hours)</label>
-                        <input type="number" min="1" max="10" value="2" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Difficulty</label>
+                        <select name="difficulty" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Total Lessons</label>
-                        <input type="number" min="1" max="20" value="4" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Duration (Minutes)</label>
+                        <input name="duration_minutes" type="number" min="15" max="300" value="45" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Content Source</label>
-                    <input type="text" placeholder="e.g. W3Schools, NIST guidelines, Custom" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Lesson Count</label>
+                        <input name="lesson_count" type="number" min="0" value="4" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Course</label>
+                        <select name="course_id" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                            <option value="">No Course</option>
+                            @foreach($courses ?? [] as $course)
+                            <option value="{{ $course->id }}">{{ $course->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Description</label>
-                    <textarea rows="4" placeholder="Briefly describe the topics covered in this module..." class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                    <textarea name="description" rows="4" placeholder="Briefly describe the topics covered in this module..." required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Required Roles</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="required_roles[]" value="student" class="rounded text-blue-600">
+                            <span class="text-sm">Student</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="required_roles[]" value="instructor" class="rounded text-blue-600">
+                            <span class="text-sm">Instructor</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="required_roles[]" value="admin" class="rounded text-blue-600">
+                            <span class="text-sm">Admin</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="is_active" id="module_active" class="rounded text-blue-600">
+                    <label for="module_active" class="text-sm font-semibold text-slate-700">Publish immediately</label>
                 </div>
 
                 <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800 flex gap-2">
                     <svg class="w-4 h-4 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Modules are added in draft status by default. You can publish them immediately from the dashboard after creation.</span>
+                    <span>Modules are added in draft status by default unless "Publish immediately" is checked.</span>
                 </div>
-                
+
                 <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-auto">
                     <button type="button" onclick="toggleCreateDrawer(false)" class="px-4 py-2.5 border border-slate-250 rounded-xl text-slate-650 hover:bg-slate-50 text-sm font-semibold">Cancel</button>
                     <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Save Module</button>

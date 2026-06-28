@@ -49,14 +49,16 @@ Route::middleware('auth')->group(function () {
         Route::get ('/admin/courses', [DashboardController::class, 'adminCourses'])->name('admin.courses');
         Route::get ('/admin/quizzes', [DashboardController::class, 'adminQuizzes'])->name('admin.quizzes');
         Route::get ('/admin/users', [DashboardController::class, 'adminUsers'])->name('admin.users');
+        Route::post('/admin/users', [DashboardController::class, 'storeUser'])->name('admin.users.store');
         Route::get ('/admin/reports', [DashboardController::class, 'adminReports'])->name('admin.reports');
+        Route::get ('/admin/reports/export', [DashboardController::class, 'exportReports'])->name('admin.reports.export');
 
         Route::get ('/admin/audit-logs', [DashboardController::class, 'auditLogs'])->name('admin.audit-logs');
         Route::get ('/admin/security-logs', [DashboardController::class, 'securityLogs'])->name('admin.security-logs');
 
         // Admin CRUD routes for courses
-        Route::get ('/admin/courses/create', [AdminCourseController::class, 'create'])->name('admin.courses.create');
-        Route::post('/admin/courses', [AdminCourseController::class, 'store'])->name('admin.courses.store');
+        Route::get ('/admin/courses/create', [DashboardController::class, 'adminCoursesCreate'])->name('admin.courses.create');
+        Route::post('/admin/courses', [DashboardController::class, 'storeCourse'])->name('admin.courses.store');
         Route::get ('/admin/courses/{course}', [AdminCourseController::class, 'show'])->name('admin.courses.show');
         Route::get ('/admin/courses/{course}/edit', [AdminCourseController::class, 'edit'])->name('admin.courses.edit');
         Route::put ('/admin/courses/{course}', [AdminCourseController::class, 'update'])->name('admin.courses.update');
@@ -65,8 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus'])->name('admin.courses.toggle-status');
 
         // Admin CRUD routes for modules
-        Route::get ('/admin/modules/create', [AdminModuleController::class, 'create'])->name('admin.modules.create');
-        Route::post('/admin/modules', [AdminModuleController::class, 'store'])->name('admin.modules.store');
+        Route::get ('/admin/modules/create', [DashboardController::class, 'adminModulesCreate'])->name('admin.modules.create');
+        Route::post('/admin/modules', [DashboardController::class, 'storeModule'])->name('admin.modules.store');
         Route::get ('/admin/modules/{module}', [AdminModuleController::class, 'show'])->name('admin.modules.show');
         Route::get ('/admin/modules/{module}/edit', [AdminModuleController::class, 'edit'])->name('admin.modules.edit');
         Route::put ('/admin/modules/{module}', [AdminModuleController::class, 'update'])->name('admin.modules.update');
@@ -74,9 +76,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/modules/bulk-delete', [AdminModuleController::class, 'bulkDelete'])->name('admin.modules.bulk-delete');
         Route::post('/admin/modules/{module}/toggle-status', [AdminModuleController::class, 'toggleStatus'])->name('admin.modules.toggle-status');
 
+        // Admin CRUD routes for lessons
+        Route::get ('/admin/modules/{module}/lessons/create', [LessonController::class, 'create'])->name('admin.lessons.create');
+        Route::post('/admin/modules/{module}/lessons', [LessonController::class, 'store'])->name('admin.lessons.store');
+        Route::get ('/admin/modules/{module}/lessons/{lesson}/edit', [LessonController::class, 'edit'])->name('admin.lessons.edit');
+        Route::put ('/admin/modules/{module}/lessons/{lesson}', [LessonController::class, 'update'])->name('admin.lessons.update');
+        Route::delete('/admin/modules/{module}/lessons/{lesson}', [LessonController::class, 'destroy'])->name('admin.lessons.destroy');
+
         // Admin CRUD routes for quizzes
-        Route::get ('/admin/quizzes/create', [AdminQuizController::class, 'create'])->name('admin.quizzes.create');
-        Route::post('/admin/quizzes', [AdminQuizController::class, 'store'])->name('admin.quizzes.store');
+        Route::get ('/admin/quizzes/create', [DashboardController::class, 'adminQuizzesCreate'])->name('admin.quizzes.create');
+        Route::post('/admin/quizzes', [DashboardController::class, 'storeQuiz'])->name('admin.quizzes.store');
         Route::get ('/admin/quizzes/{quiz}', [AdminQuizController::class, 'show'])->name('admin.quizzes.show');
         Route::get ('/admin/quizzes/{quiz}/edit', [AdminQuizController::class, 'edit'])->name('admin.quizzes.edit');
         Route::put ('/admin/quizzes/{quiz}', [AdminQuizController::class, 'update'])->name('admin.quizzes.update');
@@ -89,7 +98,7 @@ Route::middleware('auth')->group(function () {
 
         // Admin CRUD routes for users
         Route::get ('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
-        Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+        Route::post('/admin/users', [DashboardController::class, 'storeUser'])->name('admin.users.store');
         Route::get ('/admin/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
         Route::get ('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
         Route::put ('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
@@ -111,7 +120,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/instructor/dashboard', [DashboardController::class, 'index'])->name('instructor.dashboard');
         Route::get('/instructor/courses', [DashboardController::class, 'instructorCourses'])->name('instructor.courses');
         Route::get('/instructor/students', [DashboardController::class, 'instructorStudents'])->name('instructor.students');
+        Route::get('/instructor/students/export', [DashboardController::class, 'exportStudents'])->name('instructor.students.export');
         Route::get('/instructor/assessments', [DashboardController::class, 'instructorAssessments'])->name('instructor.assessments');
+        Route::get('/instructor/assessments/export', [DashboardController::class, 'exportAssessments'])->name('instructor.assessments.export');
+        Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     });
 
     // Module action routes - require authentication

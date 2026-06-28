@@ -19,6 +19,9 @@ class Quiz extends Model
         'passing_score',
         'time_limit_minutes',
         'attempts_allowed',
+        'question_distribution',
+        'show_correct_answers',
+        'shuffle_options',
         'is_active',
     ];
 

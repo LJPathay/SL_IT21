@@ -11,10 +11,10 @@
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Security Reports & Metrics</h2>
             <p class="text-slate-500 text-sm">Analyze overall organization progress, quiz completion graphs, and audit logs.</p>
         </div>
-        <button onclick="alert('Exporting PDF...')" class="inline-flex items-center gap-2 bg-white border border-slate-350 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors shrink-0">
+        <a href="{{ route('admin.reports.export') }}" class="inline-flex items-center gap-2 bg-white border border-slate-350 text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Export PDF
-        </button>
+        </a>
     </div>
 
     <!-- Reports Grid: Metrics and Charts -->
@@ -82,57 +82,36 @@
         <!-- Right: Course completion percentages -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
             <h3 class="font-bold text-slate-800 text-base mb-6">Completion by Module</h3>
-            
+
             <div class="space-y-5 flex-1">
-                <!-- Module 1 -->
+                @forelse($moduleCompletions as $index => $module)
                 <div class="space-y-1.5">
                     <div class="flex justify-between text-xs font-semibold">
-                        <span class="text-slate-700">Phishing Detection</span>
-                        <span class="text-slate-905">91% Completed</span>
+                        <span class="text-slate-700">{{ $module['title'] }}</span>
+                        <span class="text-slate-905">{{ $module['completion_percentage'] }}% Completed</span>
                     </div>
                     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div class="bg-green-500 h-full rounded-full" style="width: 91%"></div>
+                        @php
+                            $colors = ['bg-green-500', 'bg-blue-600', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'];
+                            $color = $colors[$index % count($colors)];
+                            $statusColor = $module['is_active'] ? $color : 'bg-slate-300';
+                        @endphp
+                        <div class="{{ $statusColor }} h-full rounded-full" style="width: {{ $module['completion_percentage'] }}%"></div>
                     </div>
                 </div>
-
-                <!-- Module 2 -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs font-semibold">
-                        <span class="text-slate-700">SQL Injection Prevention</span>
-                        <span class="text-slate-905">64% Completed</span>
-                    </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div class="bg-blue-600 h-full rounded-full" style="width: 64%"></div>
-                    </div>
+                @empty
+                <div class="text-center text-slate-500 text-sm py-8">
+                    <p>No modules found</p>
                 </div>
-
-                <!-- Module 3 -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs font-semibold">
-                        <span class="text-slate-700">Password Security</span>
-                        <span class="text-slate-905">42% Completed</span>
-                    </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div class="bg-purple-500 h-full rounded-full" style="width: 42%"></div>
-                    </div>
-                </div>
-
-                <!-- Module 4 -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs font-semibold">
-                        <span class="text-slate-700">Malware Threat Recognition</span>
-                        <span class="text-slate-905">0% (Draft Stage)</span>
-                    </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div class="bg-slate-300 h-full rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
+                @endforelse
             </div>
-            
+
+            @if($moduleCompletions->isNotEmpty())
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl mt-6">
                 <div class="text-xs font-semibold text-slate-700">Highest Engagement:</div>
-                <div class="text-sm font-black text-blue-600 mt-0.5">Phishing Detection (814 enrolled)</div>
+                <div class="text-sm font-black text-blue-600 mt-0.5">{{ $moduleCompletions->first()['title'] }} ({{ $moduleCompletions->first()['total_enrolled'] }} enrolled)</div>
             </div>
+            @endif
         </div>
         
     </div>

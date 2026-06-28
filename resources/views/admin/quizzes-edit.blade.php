@@ -89,6 +89,48 @@
                 <label for="is_active" class="text-sm font-medium text-slate-700">Quiz is active</label>
             </div>
 
+            <!-- Assessment Standards -->
+            <div class="border-t border-slate-200 pt-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Assessment Standards</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Question Distribution -->
+                    <div>
+                        <label for="question_distribution" class="block text-sm font-semibold text-slate-700 mb-1">Question Distribution</label>
+                        <select name="question_distribution" id="question_distribution"
+                            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white">
+                            <option value="sequential" {{ old('question_distribution', $quiz->question_distribution ?? 'sequential') == 'sequential' ? 'selected' : '' }}>Sequential</option>
+                            <option value="randomized" {{ old('question_distribution', $quiz->question_distribution ?? 'sequential') == 'randomized' ? 'selected' : '' }}>Randomized</option>
+                        </select>
+                    </div>
+
+                    <!-- Attempts Allowed -->
+                    <div>
+                        <label for="attempts_allowed" class="block text-sm font-semibold text-slate-700 mb-1">Attempts Allowed</label>
+                        <input type="number" name="attempts_allowed" id="attempts_allowed" value="{{ old('attempts_allowed', $quiz->attempts_allowed ?? 0) }}" min="0"
+                            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            placeholder="0 for unlimited">
+                    </div>
+
+                    <!-- Show Correct Answers -->
+                    <div>
+                        <label for="show_correct_answers" class="block text-sm font-semibold text-slate-700 mb-1">Show Correct Answers</label>
+                        <select name="show_correct_answers" id="show_correct_answers"
+                            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white">
+                            <option value="never" {{ old('show_correct_answers', $quiz->show_correct_answers ?? 'after_submission') == 'never' ? 'selected' : '' }}>Never</option>
+                            <option value="after_submission" {{ old('show_correct_answers', $quiz->show_correct_answers ?? 'after_submission') == 'after_submission' ? 'selected' : '' }}>After Submission</option>
+                            <option value="immediately" {{ old('show_correct_answers', $quiz->show_correct_answers ?? 'after_submission') == 'immediately' ? 'selected' : '' }}>Immediately</option>
+                        </select>
+                    </div>
+
+                    <!-- Shuffle Options -->
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" name="shuffle_options" id="shuffle_options" value="1" {{ $quiz->shuffle_options ?? false ? 'checked' : '' }}
+                            class="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <label for="shuffle_options" class="text-sm font-medium text-slate-700">Shuffle Answer Options</label>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
                 <a href="{{ route('admin.quizzes') }}" class="px-5 py-2.5 border border-slate-300 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors">

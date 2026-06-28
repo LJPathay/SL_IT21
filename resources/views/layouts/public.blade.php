@@ -18,10 +18,8 @@
     <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 md:h-20">
-                <a href="{{ url('/') }}" class="flex items-center gap-2">
-                    <div class="bg-blue-600 rounded-xl p-4 shadow-md">
-                        <img src="{{ asset('img/logo.png') }}" alt="SecureLearn Logo" class="w-24 h-24 md:w-32 md:h-32">
-                    </div>
+                <a href="{{ url('/') }}" class="flex items-center">
+                    <img src="{{ asset('img/logo_nasad.png') }}" alt="SecureLearn Logo" class="h-28 w-auto">
                 </a>
 
                 <!-- Desktop Nav -->

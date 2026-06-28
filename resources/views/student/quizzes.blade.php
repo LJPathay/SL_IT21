@@ -47,7 +47,7 @@
                         <div class="font-black text-slate-900 text-base">{{ $result->score ?? 0 }}%</div>
                         <div class="text-[10px] text-slate-450 font-bold uppercase">Score</div>
                     </div>
-                    <a href="{{ route('student.quizzes.show', $result->quiz_id) }}" class="inline-block bg-white border border-slate-250 hover:bg-slate-50 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition-colors">Retake Quiz</a>
+                    <a href="{{ route('student.quizzes.show', $result->quiz->id) }}" class="inline-block bg-white border border-slate-250 hover:bg-slate-50 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-sm transition-colors">Retake Quiz</a>
                 </div>
             </div>
             @empty

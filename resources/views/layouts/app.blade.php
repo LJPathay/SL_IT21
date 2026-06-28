@@ -53,6 +53,10 @@
             'assessments' => 'Assessment Performance',
             default => 'Instructor Portal'
         };
+    } elseif ($segment === 'modules') {
+        $header_title = match($subSegment) {
+            default => 'Learning Modules'
+        };
     } else { // student
         $header_title = match($subSegment) {
             'dashboard' => 'Student Dashboard',

@@ -36,10 +36,10 @@
                 </select>
                 <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm">Filter</button>
                 <a href="{{ route('instructor.students') }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-sm">Clear</a>
-                <button type="button" onclick="alert('Exporting student data...')" class="bg-white border border-slate-250 hover:bg-slate-50 text-slate-655 text-sm px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-colors">
+                <a href="{{ route('instructor.students.export') }}" class="bg-white border border-slate-250 hover:bg-slate-50 text-slate-655 text-sm px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Export
-                </button>
+                </a>
             </div>
         </form>
 
@@ -76,7 +76,7 @@
                         <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $enrollment->updated_at ? $enrollment->updated_at->diffForHumans() : 'N/A' }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
-                                <button onclick="toggleMessageModal('{{ $enrollment->user->email ?? '' }}')" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
+                                <button onclick="toggleMessageModal('{{ $enrollment->user->email ?? '' }}', {{ $enrollment->user->id ?? 0 }})" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>
                                 <button class="text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold px-3 py-1.5 rounded-lg transition-colors">Nudge</button>
                             </div>
                         </td>
@@ -109,22 +109,24 @@
                 </button>
             </div>
             
-            <form class="p-6 space-y-4" onsubmit="event.preventDefault(); alert('Message successfully sent!'); toggleMessageModal(null);">
+            <form method="POST" action="{{ route('messages.store') }}" class="p-6 space-y-4">
+                @csrf
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">To Student</label>
-                    <input id="recipient_email" type="text" readonly class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none">
+                    <input id="recipient_email" name="recipient_email" type="text" readonly class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none">
+                    <input id="recipient_id" name="recipient_id" type="hidden">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Subject</label>
-                    <input type="text" value="Course Progress Update" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                    <input name="subject" type="text" value="Course Progress Update" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Message Content</label>
-                    <textarea rows="4" required placeholder="Write your message here..." class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                    <textarea name="body" rows="4" required placeholder="Write your message here..." class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
                 </div>
-                
+
                 <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4">
                     <button type="button" onclick="toggleMessageModal(null)" class="px-4 py-2.5 border border-slate-250 rounded-xl text-slate-650 hover:bg-slate-50 text-sm font-semibold">Cancel</button>
                     <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Send Message</button>
@@ -136,12 +138,14 @@
 </div>
 
 <script>
-    function toggleMessageModal(email) {
+    function toggleMessageModal(email, userId) {
         const backdrop = document.getElementById('message-modal-backdrop');
         const modal = document.getElementById('message-modal');
-        const input = document.getElementById('recipient_email');
+        const emailInput = document.getElementById('recipient_email');
+        const idInput = document.getElementById('recipient_id');
         if (email) {
-            input.value = email;
+            emailInput.value = email;
+            idInput.value = userId;
             backdrop.classList.remove('pointer-events-none', 'opacity-0');
             backdrop.classList.add('opacity-100');
             modal.classList.remove('scale-90');

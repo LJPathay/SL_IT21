@@ -18,6 +18,9 @@ class Lesson extends Model
         'video_url',
         'duration_minutes',
         'is_published',
+        'image_url',
+        'attachment_url',
+        'attachment_name',
     ];
 
     protected $casts = [

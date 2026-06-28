@@ -1,9 +1,7 @@
 <aside id="app-sidebar" class="w-64 bg-white text-slate-900 flex flex-col fixed inset-y-0 left-0 z-50 -translate-x-full md:translate-x-0 md:static md:flex transition-transform duration-200 ease-in-out shrink-0 border-r border-slate-200">
-    <div class="h-20 flex items-center justify-between px-6 font-bold text-xl tracking-tight border-b border-slate-200 shrink-0">
-        <div class="flex items-center gap-2">
-            <div class="bg-blue-600 rounded-lg p-3 shadow-sm">
-                <img src="{{ asset('img/logo.png') }}" alt="SecureLearn Logo" class="w-14 h-14">
-            </div>
+    <div class="h-28 flex items-center justify-between px-6 font-bold text-xl tracking-tight border-b border-slate-200 shrink-0">
+        <div class="flex-1 flex items-center justify-center">
+            <img src="{{ asset('img/logo_nasad.png') }}" alt="SecureLearn Logo" class="h-20 w-auto">
         </div>
         <!-- Close button (mobile only) -->
         <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-900">

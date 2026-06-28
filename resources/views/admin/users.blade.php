@@ -85,7 +85,9 @@
                         </td>
                         <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-xs text-blue-600 hover:text-blue-800 font-bold">Audit Log</button>
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.users.edit', $user) }}" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -116,28 +118,35 @@
                 </button>
             </div>
             
-            <form class="p-6 space-y-4" onsubmit="event.preventDefault(); alert('Invitation email sent to ' + document.getElementById('invite_email').value); toggleInviteModal(false);">
+            <form method="POST" action="{{ route('admin.users.store') }}" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
+                    <input name="name" type="text" placeholder="e.g. John Doe" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                    <input id="invite_email" type="email" placeholder="e.g. employee@company.com" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    <input name="email" type="email" placeholder="e.g. employee@company.com" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                 </div>
-                
+
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Initial Designation Role</label>
-                    <select class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <input name="password" type="password" placeholder="Minimum 8 characters" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Role</label>
+                    <select name="role" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
                         <option value="student">Student / Employee</option>
                         <option value="instructor">Instructor / Security Lead</option>
                         <option value="admin">Administrator</option>
                     </select>
                 </div>
-                
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed">
-                    Once you send this invite, the user will receive a verification link with details to register and access their customized learning dashboards.
-                </div>
 
                 <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4">
                     <button type="button" onclick="toggleInviteModal(false)" class="px-4 py-2.5 border border-slate-250 rounded-xl text-slate-650 hover:bg-slate-50 text-sm font-semibold">Cancel</button>
-                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Send Invite</button>
+                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Create User</button>
                 </div>
             </form>
         </div>

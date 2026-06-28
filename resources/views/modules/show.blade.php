@@ -8,7 +8,7 @@
     <div class="mb-6 flex items-center gap-2 text-sm text-slate-500 font-medium">
         <a href="{{ url('/modules') }}" class="hover:text-blue-600 transition-colors">Modules</a>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        <span class="text-slate-900">SQL Injection Prevention</span>
+        <span class="text-slate-900">{{ $module->title }}</span>
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -23,11 +23,11 @@
             
             <div class="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent">
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="px-2.5 py-1 bg-green-500 text-white text-xs font-semibold rounded-lg">Web Security</span>
-                    <span class="px-2.5 py-1 bg-white/20 text-white backdrop-blur-md text-xs font-medium rounded-lg">Trusted Source: W3Schools</span>
+                    <span class="px-2.5 py-1 bg-green-500 text-white text-xs font-semibold rounded-lg">{{ $module->category ?? 'General' }}</span>
+                    <span class="px-2.5 py-1 bg-white/20 text-white backdrop-blur-md text-xs font-medium rounded-lg">{{ $module->difficulty ?? 'All Levels' }}</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">SQL Injection Prevention</h2>
-                <p class="text-slate-300 max-w-2xl text-sm md:text-base">Master the core concepts of SQL injection attacks and learn the definitive best practices for writing secure queries in modern web applications.</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">{{ $module->title }}</h2>
+                <p class="text-slate-300 max-w-2xl text-sm md:text-base">{{ $module->description ?? 'Learn essential security concepts and best practices.' }}</p>
             </div>
         </div>
 
@@ -37,59 +37,36 @@
             <div class="md:col-span-2 space-y-8">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 mb-4">What you'll learn</h3>
-                    <ul class="grid sm:grid-cols-2 gap-3">
-                        <li class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-slate-600 text-sm">Understand what SQL Injection (SQLi) is.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-slate-600 text-sm">Identify vulnerable code patterns.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-slate-600 text-sm">Use prepared statements and parameterized queries.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-slate-600 text-sm">Apply ORM best practices (like Laravel Eloquent).</span>
-                        </li>
-                    </ul>
+                    <p class="text-slate-600 text-sm">{{ $module->description ?? 'This module covers essential security concepts and best practices.' }}</p>
                 </div>
 
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 mb-4">Course Syllabus</h3>
                     <div class="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
-                        <div class="p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">1</div>
-                                <span class="font-medium text-slate-800">Introduction to SQL Injection</span>
-                            </div>
-                            <span class="text-sm text-slate-500">15 min</span>
-                        </div>
-                        <div class="p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">2</div>
-                                <span class="font-medium text-slate-800">The "1=1" Attack Vector</span>
-                            </div>
-                            <span class="text-sm text-slate-500">20 min</span>
-                        </div>
-                        <div class="p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">3</div>
-                                <span class="font-medium text-slate-800">Defending with Prepared Statements</span>
-                            </div>
-                            <span class="text-sm text-slate-500">30 min</span>
-                        </div>
-                        <div class="p-4 flex items-center justify-between bg-slate-50">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        @if($module->lessons && $module->lessons->count() > 0)
+                            @foreach($module->lessons->sortBy('order') as $index => $lesson)
+                            <div class="p-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">{{ $index + 1 }}</div>
+                                    <span class="font-medium text-slate-800">{{ $lesson->title }}</span>
                                 </div>
-                                <span class="font-medium text-slate-800">End of Module Assessment</span>
+                                <span class="text-sm text-slate-500">{{ $lesson->duration_minutes ?? '15' }} min</span>
                             </div>
-                            <span class="text-sm text-slate-500">10 Questions</span>
-                        </div>
+                            @endforeach
+                        @else
+                            <div class="p-4 text-center text-slate-500 text-sm">No lessons available yet</div>
+                        @endif
+                        @if($module->quizzes && $module->quizzes->count() > 0)
+                            <div class="p-4 flex items-center justify-between bg-slate-50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                    </div>
+                                    <span class="font-medium text-slate-800">End of Module Assessment</span>
+                                </div>
+                                <span class="text-sm text-slate-500">{{ $module->quizzes->count() }} Question(s)</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -102,9 +79,9 @@
                         <p class="text-sm text-slate-500 font-medium">Included in your organization plan</p>
                     </div>
 
-                    <a href="{{ url('/learn/' . $module->id) }}" class="w-full block text-center py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mb-6">
+                    <button onclick="confirmEnrollment({{ $module->id }})" class="w-full py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mb-6">
                         Enroll Now
-                    </a>
+                    </button>
                     
                     <ul class="space-y-4 text-sm font-medium text-slate-600">
                         <li class="flex items-center gap-3">
@@ -132,4 +109,12 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmEnrollment(moduleId) {
+    if (confirm('Are you sure you want to enroll in this module?')) {
+        window.location.href = '/modules/' + moduleId + '/enroll';
+    }
+}
+</script>
 @endsection

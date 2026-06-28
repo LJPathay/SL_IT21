@@ -70,9 +70,18 @@ class ModuleController extends Controller
 
         // Check if user has access to this module (only if authenticated)
         if ($user) {
-            $requiredRoles = $module->required_roles ?? [];
-            if (!empty($requiredRoles) && !in_array($user->role, $requiredRoles)) {
-                abort(403, 'Unauthorized');
+            // Instructors can view modules they teach
+            if ($user->isInstructor()) {
+                $taughtCourseIds = $user->taughtCourses()->pluck('id')->toArray();
+                if (!in_array($module->course_id, $taughtCourseIds)) {
+                    abort(403, 'Unauthorized - You do not teach this module');
+                }
+            } else {
+                // Students and admins check required roles
+                $requiredRoles = $module->required_roles ?? [];
+                if (!empty($requiredRoles) && !in_array($user->role, $requiredRoles)) {
+                    abort(403, 'Unauthorized');
+                }
             }
         }
 
@@ -94,6 +103,11 @@ class ModuleController extends Controller
         }
 
         $relatedModules = $relatedQuery->limit(3)->get();
+
+        // Load lessons and quizzes for the module
+        $module->load(['lessons' => function($query) {
+            $query->orderBy('order')->published();
+        }, 'quizzes']);
 
         return view('modules.show', [
             'module' => $module,
@@ -128,12 +142,13 @@ class ModuleController extends Controller
         UserEnrollment::create([
             'user_id' => $user->id,
             'module_id' => $module->id,
+            'course_id' => $module->course_id,
             'status' => 'active',
             'progress_percentage' => 0,
             'enrolled_at' => now(),
         ]);
 
-        return redirect()->back()->with('success', 'Successfully enrolled in ' . $module->title);
+        return redirect()->route('student.courses')->with('success', 'Successfully enrolled in ' . $module->title);
     }
 
     /**

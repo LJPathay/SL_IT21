@@ -160,5 +160,74 @@
             </div>
         </form>
     </div>
+
+    <!-- Lessons Section -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 text-base">Module Lessons</h3>
+            <a href="{{ route('admin.lessons.create', $module) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-blue-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add Lesson
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/30 border-b border-slate-150 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Order</th>
+                        <th class="px-6 py-4">Lesson Title</th>
+                        <th class="px-6 py-4">Duration</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    @forelse($module->lessons()->ordered()->get() as $lesson)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 font-medium text-slate-700">{{ $lesson->order }}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900">{{ $lesson->title }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600">{{ $lesson->duration_minutes ? $lesson->duration_minutes . ' min' : 'N/A' }}</td>
+                        <td class="px-6 py-4">
+                            @if($lesson->is_published)
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                Published
+                            </span>
+                            @else
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                <span class="h-1.5 w-1.5 rounded-full bg-slate-450"></span>
+                                Draft
+                            </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.lessons.edit', [$module, $lesson]) }}" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+                                <form method="POST" action="{{ route('admin.lessons.destroy', [$module, $lesson]) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this lesson?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs bg-red-50 text-red-700 hover:bg-red-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p class="font-medium">No lessons found</p>
+                                <p class="text-sm">Add lessons to this module to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection

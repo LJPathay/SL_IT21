@@ -11,7 +11,7 @@
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Training Courses</h2>
             <p class="text-slate-500 text-sm">Manage course offerings, instructors, and enrollments.</p>
         </div>
-        <button onclick="alert('Create course modal would open here')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-blue-200 shrink-0">
+        <button onclick="toggleCourseModal(true)" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-blue-200 shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             Create Course
         </button>
@@ -79,10 +79,8 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right text-sm">
-                            <div class="flex items-center justify-end gap-2">
-                                <button class="p-1 text-slate-400 hover:text-blue-600 transition-colors" title="Edit course">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.courses.edit', $course) }}" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold px-3 py-1.5 rounded-lg transition-colors">Edit</a>
                             </div>
                         </td>
                     </tr>
@@ -104,5 +102,82 @@
         {{ $courses->links() }}
     </div>
 
+    <!-- CREATE COURSE MODAL DIALOG -->
+    <div id="course-modal-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none" onclick="toggleCourseModal(false)">
+        <div id="course-modal" class="max-w-lg w-full bg-white rounded-2xl shadow-2xl overflow-hidden scale-90 transition-transform duration-300 ease-out" onclick="event.stopPropagation()">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 class="font-bold text-slate-900 text-lg">Create New Course</h3>
+                <button onclick="toggleCourseModal(false)" class="p-1 text-slate-400 hover:text-slate-650 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.courses.store') }}" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Course Title</label>
+                    <input name="title" type="text" placeholder="e.g. Web Security Fundamentals" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Course Code</label>
+                    <input name="code" type="text" placeholder="e.g. WS-101" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                    <textarea name="description" rows="3" placeholder="Briefly describe the course..." required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Level</label>
+                        <select name="level" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" required>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Capacity</label>
+                        <input name="capacity" type="number" min="1" max="1000" value="50" required class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Instructor</label>
+                    <select name="instructor_id" class="w-full px-4 py-2.5 border border-slate-250 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" required>
+                        @foreach($instructors ?? [] as $instructor)
+                        <option value="{{ $instructor->id }}">{{ $instructor->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4">
+                    <button type="button" onclick="toggleCourseModal(false)" class="px-4 py-2.5 border border-slate-250 rounded-xl text-slate-650 hover:bg-slate-50 text-sm font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200">Create Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    function toggleCourseModal(show) {
+        const backdrop = document.getElementById('course-modal-backdrop');
+        const modal = document.getElementById('course-modal');
+        if (show) {
+            backdrop.classList.remove('pointer-events-none', 'opacity-0');
+            backdrop.classList.add('opacity-100');
+            modal.classList.remove('scale-90');
+            modal.classList.add('scale-100');
+        } else {
+            backdrop.classList.add('pointer-events-none', 'opacity-0');
+            backdrop.classList.remove('opacity-100');
+            modal.classList.remove('scale-100');
+            modal.classList.add('scale-90');
+        }
+    }
+</script>
 @endsection
