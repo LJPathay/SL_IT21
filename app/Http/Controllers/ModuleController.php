@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Quiz;
 use App\Models\QuizResult;
 use App\Models\Certificate;
+use App\Services\CertificateService;
 
 class ModuleController extends Controller
 {
@@ -148,7 +149,7 @@ class ModuleController extends Controller
             'enrolled_at' => now(),
         ]);
 
-        return redirect()->route('student.courses')->with('success', 'Successfully enrolled in ' . $module->title);
+        return redirect()->back()->with('success', 'Successfully enrolled in ' . $module->title);
     }
 
     /**
@@ -258,7 +259,7 @@ class ModuleController extends Controller
             ]);
         }
 
-        $quiz->load('questions');
+        $quiz->load(['questions', 'module']);
 
         return view('student.take-quiz', [
             'quiz' => $quiz,
@@ -290,13 +291,17 @@ class ModuleController extends Controller
         $scorePercentage = round(($correctCount / $questions->count()) * 100);
         $passed = $scorePercentage >= $quiz->passing_score;
 
-        // Save result
+        // Save result - use correct DB columns
         QuizResult::create([
-            'user_id' => $user->id,
-            'quiz_id' => $quiz->id,
-            'score' => $scorePercentage,
-            'passed' => $passed,
-            'completed_at' => now(),
+            'user_id'           => $user->id,
+            'quiz_id'           => $quiz->id,
+            'score'             => $scorePercentage,
+            'score_percentage'  => $scorePercentage,
+            'correct_answers'   => $correctCount,
+            'questions_answered'=> $questions->count(),
+            'status'            => $passed ? 'passed' : 'failed',
+            'started_at'        => now(),
+            'completed_at'      => now(),
         ]);
 
         if ($passed) {
@@ -312,20 +317,12 @@ class ModuleController extends Controller
                 $enrollment->save();
             }
 
-            // Issue Certificate
-            $certNumber = 'CERT-' . strtoupper(bin2hex(random_bytes(4)));
-            $credentialId = 'CRED-' . strtoupper(bin2hex(random_bytes(6)));
-
-            Certificate::firstOrCreate([
-                'user_id' => $user->id,
-                'module_id' => $quiz->module_id,
-            ], [
-                'course_id' => $quiz->course_id,
-                'certificate_number' => $certNumber,
-                'credential_id' => $credentialId,
-                'title' => 'Certificate of Completion: ' . $quiz->title,
-                'issued_at' => now(),
-            ]);
+            // Issue Certificate via service - eager load module first
+            $quiz->loadMissing('module');
+            if ($quiz->module) {
+                $certService = new CertificateService();
+                $certService->generateCertificate($user, $quiz->module);
+            }
         }
 
         return redirect()->route('student.quizzes')->with(

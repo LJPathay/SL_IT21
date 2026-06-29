@@ -7,7 +7,7 @@
     <!-- Top Navbar -->
     <header class="h-14 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
         <div class="flex items-center gap-4">
-            <a href="{{ route('student.dashboard') }}" class="text-slate-400 hover:text-white transition-colors">
+            <a href="{{ url()->previous(route('modules.index')) }}" class="text-slate-400 hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div class="font-semibold text-sm border-l border-slate-700 pl-4">{{ $module->title }}: {{ $lesson->title }}</div>
@@ -54,6 +54,26 @@
                 <div class="prose prose-slate max-w-none">
                     {!! $lesson->content !!}
                 </div>
+
+                @if($lesson->attachment_url)
+                {{-- Lesson Attachment Download --}}
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-blue-900 text-sm">Lesson Attachment</p>
+                            <p class="text-blue-700 text-xs">{{ $lesson->attachment_name ?? basename($lesson->attachment_url) }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ asset($lesson->attachment_url) }}" download="{{ $lesson->attachment_name ?? 'attachment' }}" target="_blank"
+                       class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download
+                    </a>
+                </div>
+                @endif
 
                 <!-- Mark Complete Button -->
                 <div class="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200">

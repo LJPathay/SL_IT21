@@ -6,6 +6,7 @@ use App\Models\Certificate;
 use App\Models\User;
 use App\Models\Module;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CertificateService
 {
@@ -23,60 +24,58 @@ class CertificateService
             return $existing;
         }
 
-        // Generate unique certificate ID
-        $certificateId = $this->generateCertificateId();
+        // Generate unique certificate numbers and credentials
+        $certNumber = $this->generateCertificateNumber();
+        $credentialId = 'CRED-' . strtoupper(Str::random(12));
 
         // Create certificate record
         $certificate = Certificate::create([
             'user_id' => $user->id,
             'module_id' => $module->id,
-            'certificate_id' => $certificateId,
+            'course_id' => $module->course_id,
+            'certificate_number' => $certNumber,
+            'credential_id' => $credentialId,
+            'title' => 'Certificate of Completion: ' . ($module->title ?? 'Module Completion'),
             'issued_at' => now(),
-            'expiry_date' => now()->addYears(2),
+            'expires_at' => now()->addYears(2),
         ]);
 
         return $certificate;
     }
 
     /**
-     * Generate a unique certificate ID.
+     * Generate a unique certificate number.
      */
-    private function generateCertificateId(): string
+    private function generateCertificateNumber(): string
     {
         do {
-            $id = 'CERT-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
-        } while (Certificate::where('certificate_id', $id)->exists());
+            $number = 'CERT-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
+        } while (Certificate::where('certificate_number', $number)->exists());
 
-        return $id;
+        return $number;
     }
 
-    /**
-     * Generate PDF certificate (requires barryvdh/laravel-dompdf).
-     * This is a placeholder - the actual implementation requires the package to be installed.
-     */
     public function generatePdf(Certificate $certificate)
     {
-        // Note: This requires composer require barryvdh/laravel-dompdf
-        // Uncomment after installing the package
+        $certificate->load(['user', 'module']);
 
-        // $pdf = \PDF::loadView('certificates.template', [
-        //     'certificate' => $certificate,
-        //     'user' => $certificate->user,
-        //     'module' => $certificate->module,
-        // ]);
+        $pdf = Pdf::loadView('certificates.template', [
+            'certificate' => $certificate,
+            'user' => $certificate->user,
+            'module' => $certificate->module,
+        ]);
 
-        // return $pdf->download('certificate-' . $certificate->certificate_id . '.pdf');
-
-        // For now, return null
-        return null;
+        return $pdf->download('certificate-' . ($certificate->credential_id ?? $certificate->certificate_number) . '.pdf');
     }
 
     /**
      * Verify a certificate by its ID.
      */
-    public function verifyCertificate(string $certificateId): ?Certificate
+    public function verifyCertificate(string $id): ?Certificate
     {
-        return Certificate::where('certificate_id', $certificateId)->first();
+        return Certificate::where('credential_id', $id)
+            ->orWhere('certificate_number', $id)
+            ->first();
     }
 
     /**
@@ -84,8 +83,8 @@ class CertificateService
      */
     public function isCertificateValid(Certificate $certificate): bool
     {
-        return $certificate->expiry_date === null ||
-               $certificate->expiry_date->isFuture();
+        return $certificate->expires_at === null ||
+               $certificate->expires_at->isFuture();
     }
 
     /**

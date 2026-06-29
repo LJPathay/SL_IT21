@@ -8,6 +8,7 @@ use App\Services\LoggingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AdminUserController extends Controller
 {
@@ -58,7 +59,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
             'role' => 'required|in:student,instructor,admin',
             'department' => 'nullable|string|max:255',
             'is_active' => 'boolean',
@@ -68,7 +69,6 @@ class AdminUserController extends Controller
             'email.required' => 'Email is required.',
             'email.unique' => 'This email is already registered.',
             'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Passwords do not match.',
             'role.required' => 'Role is required.',
         ]);
@@ -126,7 +126,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => ['nullable', 'string', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
             'role' => 'required|in:student,instructor,admin',
             'department' => 'nullable|string|max:255',
             'is_active' => 'boolean',
@@ -135,7 +135,6 @@ class AdminUserController extends Controller
             'name.required' => 'Name is required.',
             'email.required' => 'Email is required.',
             'email.unique' => 'This email is already registered.',
-            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Passwords do not match.',
             'role.required' => 'Role is required.',
         ]);

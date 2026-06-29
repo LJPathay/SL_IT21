@@ -19,7 +19,7 @@
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Average Score</div>
-            <div class="text-2xl font-bold text-green-600 mt-1">{{ $completedQuizzes->count() > 0 ? round($completedQuizzes->avg('score'), 0) : 0 }}%</div>
+            <div class="text-2xl font-bold text-green-600 mt-1">{{ $avgScore }}%</div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Available Quizzes</div>
@@ -38,9 +38,9 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2 flex-wrap">
                         <h4 class="font-bold text-slate-900 text-base">{{ $result->quiz->title ?? 'Quiz' }}</h4>
-                        <span class="px-2.5 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded-full">Passed</span>
+                        <span class="px-2.5 py-0.5 text-xs font-bold rounded-full {{ $result->status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">{{ ucfirst($result->status ?? 'completed') }}</span>
                     </div>
-                    <p class="text-slate-500 text-xs">Requirement: 80% passing grade.</p>
+                    <p class="text-slate-500 text-xs">Passing grade: {{ $result->quiz->passing_score ?? 80 }}%.</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right shrink-0">
@@ -60,7 +60,7 @@
                         <h4 class="font-bold text-slate-900 text-base">{{ $quiz->title }}</h4>
                         <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">Ready</span>
                     </div>
-                    <p class="text-slate-500 text-xs">Requirement: 80% passing grade.</p>
+                    <p class="text-slate-500 text-xs">Passing grade: {{ $quiz->passing_score ?? 80 }}%.</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right shrink-0 text-slate-350 italic font-semibold text-xs pr-2">Not attempted</div>

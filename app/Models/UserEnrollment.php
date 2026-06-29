@@ -17,11 +17,13 @@ class UserEnrollment extends Model
         'progress_percentage',
         'enrolled_at',
         'completed_at',
+        'completed_lesson_ids',
     ];
 
     protected $casts = [
-        'enrolled_at' => 'datetime',
-        'completed_at' => 'datetime',
+        'enrolled_at'           => 'datetime',
+        'completed_at'          => 'datetime',
+        'completed_lesson_ids'  => 'array',
     ];
 
     // Relationships

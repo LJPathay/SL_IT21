@@ -108,8 +108,8 @@
                             <div class="text-sm font-medium text-slate-900">{{ $result->quiz->title ?? 'Quiz' }}</div>
                             <div class="text-xs text-slate-500">{{ $result->completed_at?->diffForHumans() ?? 'Recently' }}</div>
                         </div>
-                        <div class="text-sm font-semibold {{ $result->score_percentage >= 70 ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $result->score_percentage }}%
+                        <div class="text-sm font-semibold {{ ($result->score_percentage ?? $result->score) >= 70 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $result->score_percentage ?? $result->score ?? 0 }}%
                         </div>
                     </div>
                     @endforeach

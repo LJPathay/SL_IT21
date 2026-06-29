@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2">
-                <a href="{{ route('admin.modules') }}" class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 rounded-lg font-bold text-sm">View Modules</a>
+                <a href="{{ route('modules.index') }}" class="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 rounded-lg font-bold text-sm">View Modules</a>
                 <a href="{{ route('instructor.students') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">View Students</a>
             </div>
         </div>

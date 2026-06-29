@@ -113,8 +113,14 @@
 <script>
 function confirmEnrollment(moduleId) {
     if (confirm('Are you sure you want to enroll in this module?')) {
-        window.location.href = '/modules/' + moduleId + '/enroll';
+        const form = document.getElementById('enroll-form-' + moduleId);
+        if (form) form.submit();
     }
 }
 </script>
+@auth
+<form id="enroll-form-{{ $module->id }}" method="POST" action="{{ route('modules.enroll', $module) }}" class="hidden">
+    @csrf
+</form>
+@endauth
 @endsection

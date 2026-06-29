@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class DashboardController extends Controller
 {
@@ -532,14 +533,13 @@ class DashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'role' => 'required|in:student,instructor,admin',
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
         ], [
             'name.required' => 'Name is required.',
             'email.required' => 'Email is required.',
             'email.unique' => 'This email is already registered.',
             'role.required' => 'Role is required.',
             'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
         ]);
 
         $user = User::create([
@@ -899,7 +899,7 @@ class DashboardController extends Controller
 
             foreach ($students as $student) {
                 $moduleNames = $student->enrollments->pluck('module.title')->implode(', ');
-                $avgProgress = $student->enrollments->avg('progress') ?? 0;
+                $avgProgress = $student->enrollments->avg('progress_percentage') ?? 0;
 
                 fputcsv($file, [
                     $student->name,
@@ -952,9 +952,16 @@ class DashboardController extends Controller
         })->whereNotIn('id', $completedQuizIds)
             ->get();
 
+        // Compute average over ALL results (not just current page)
+        $avgScore = round(
+            $user->quizResults()->whereNotNull('completed_at')->avg('score') ?? 0,
+            0
+        );
+
         return view('student.quizzes', [
             'completedQuizzes' => $completedQuizzes,
             'availableQuizzes' => $availableQuizzes,
+            'avgScore'         => $avgScore,
         ]);
     }
 
@@ -977,6 +984,20 @@ class DashboardController extends Controller
         return view('student.certificates', [
             'certificates' => $certificates,
         ]);
+    }
+
+    /**
+     * Download certificate as PDF.
+     */
+    public function downloadCertificate(Certificate $certificate)
+    {
+        $user = Auth::user();
+        if ($certificate->user_id !== $user->id) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $service = new \App\Services\CertificateService();
+        return $service->generatePdf($certificate);
     }
 
     public function studentInbox(Request $request)

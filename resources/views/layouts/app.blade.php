@@ -87,8 +87,127 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Animation CSS styles -->
+    <style>
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fade-out-down {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+        }
+        @keyframes skeleton-shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-fade-out-down {
+            animation: fade-out-down 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .skeleton-loader {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite linear;
+        }
+    </style>
 </head>
-<body class="h-full antialiased text-slate-900 flex">
+<body class="h-full antialiased text-slate-900 flex relative">
+
+    <!-- Toast Notification Wrapper -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-55 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+        @if(session('success'))
+            <div class="toast-alert flex items-start gap-3 bg-white border-l-4 border-green-500 shadow-xl rounded-xl p-4 animate-fade-in-up pointer-events-auto" role="alert">
+                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-slate-900 text-sm">Success</h4>
+                    <p class="text-slate-650 text-xs mt-0.5">{{ session('success') }}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="toast-alert flex items-start gap-3 bg-white border-l-4 border-red-500 shadow-xl rounded-xl p-4 animate-fade-in-up pointer-events-auto" role="alert">
+                <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-slate-900 text-sm">Error</h4>
+                    <p class="text-slate-650 text-xs mt-0.5">{{ session('error') }}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        @endif
+    </div>
+
+    <!-- Script to automatically dismiss notifications -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.toast-alert');
+            alerts.forEach((alert) => {
+                setTimeout(() => {
+                    alert.classList.add('animate-fade-out-down');
+                    alert.addEventListener('animationend', () => alert.remove());
+                }, 5000);
+            });
+        });
+        
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const alertElement = document.createElement('div');
+            alertElement.className = `toast-alert flex items-start gap-3 bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} shadow-xl rounded-xl p-4 animate-fade-in-up pointer-events-auto`;
+            
+            const iconBg = type === 'success' ? 'bg-green-100' : 'bg-red-100';
+            const iconColor = type === 'success' ? 'text-green-600' : 'text-red-600';
+            const svgIcon = type === 'success' 
+                ? `<svg class="w-4 h-4 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+                : `<svg class="w-4 h-4 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            
+            alertElement.innerHTML = `
+                <div class="w-6 h-6 rounded-full ${iconBg} flex items-center justify-center shrink-0">
+                    ${svgIcon}
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-slate-900 text-sm">${title}</h4>
+                    <p class="text-slate-650 text-xs mt-0.5">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            
+            container.appendChild(alertElement);
+            setTimeout(() => {
+                alertElement.classList.add('animate-fade-out-down');
+                alertElement.addEventListener('animationend', () => alertElement.remove());
+            }, 5000);
+        }
+    </script>
 
     <!-- Mobile sidebar overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>

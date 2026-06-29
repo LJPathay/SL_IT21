@@ -54,7 +54,7 @@
                 <input
                     id="password" name="password" type="password" required
                     class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all @error('password') border-red-500 @enderror"
-                    placeholder="Minimum 8 characters"
+                    placeholder="Min. 12 characters, mixed case, numbers &amp; symbols"
                 >
                 @error('password')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>

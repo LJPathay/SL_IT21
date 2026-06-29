@@ -248,9 +248,8 @@ class LessonController extends Controller
                 ->where('module_id', $module->id)
                 ->first();
 
-            // Get completed lessons from enrollment (stored in JSON or separate table)
-            // For now, we'll use a simple approach
-            $completedLessons = $enrollment ? json_decode($enrollment->completed_lesson_ids ?? '[]', true) : [];
+            // completed_lesson_ids is cast as array in UserEnrollment model
+            $completedLessons = $enrollment ? ($enrollment->completed_lesson_ids ?? []) : [];
         }
 
         $isCompleted = in_array($lesson->id, $completedLessons);
@@ -299,13 +298,13 @@ class LessonController extends Controller
             ]
         );
 
-        // Get current completed lessons
-        $completedLessons = json_decode($enrollment->completed_lesson_ids ?? '[]', true);
+        // Get current completed lessons (model casts this as array automatically)
+        $completedLessons = $enrollment->completed_lesson_ids ?? [];
 
         // Add lesson to completed if not already there
         if (!in_array($lesson->id, $completedLessons)) {
             $completedLessons[] = $lesson->id;
-            $enrollment->completed_lesson_ids = json_encode($completedLessons);
+            $enrollment->completed_lesson_ids = $completedLessons;
         }
 
         // Calculate new progress

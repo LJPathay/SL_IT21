@@ -123,7 +123,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/instructor/students/export', [DashboardController::class, 'exportStudents'])->name('instructor.students.export');
         Route::get('/instructor/assessments', [DashboardController::class, 'instructorAssessments'])->name('instructor.assessments');
         Route::get('/instructor/assessments/export', [DashboardController::class, 'exportAssessments'])->name('instructor.assessments.export');
-        Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     });
 
     // Module action routes - require authentication
@@ -159,6 +158,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/student/quizzes/{quiz}', [ModuleController::class, 'showQuiz'])->name('student.quizzes.show');
         Route::post('/student/quizzes/{quiz}/submit', [ModuleController::class, 'submitQuiz'])->name('student.quizzes.submit');
         Route::get('/student/certificates', [DashboardController::class, 'studentCertificates'])->name('student.certificates');
+        Route::get('/student/certificates/{certificate}/download', [DashboardController::class, 'downloadCertificate'])->name('student.certificates.download');
         Route::get('/student/inbox', [DashboardController::class, 'studentInbox'])->name('student.inbox');
     });
 });

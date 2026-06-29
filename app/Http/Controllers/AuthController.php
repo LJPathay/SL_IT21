@@ -16,6 +16,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PragmaRX\Google2FA\Google2FA;
 
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rules\Password as PasswordRule;
+
 class AuthController extends Controller
 {
     /**
@@ -59,16 +62,40 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        $email = trim($request->input('email'));
+        $ip = $request->ip();
+        $rateLimitKey = 'login-attempts:' . $email . '|' . $ip;
+        $penaltyTierKey = 'login-penalty-tier:' . $email . '|' . $ip;
+
+        // Check if user is locked out
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            $minutes = ceil($seconds / 60);
+            
+            LoggingService::logSecurityEvent(
+                'login_lockout_triggered',
+                'warning',
+                null,
+                $request,
+                '/login',
+                429,
+                ['email' => $email, 'seconds_left' => $seconds]
+            );
+
+            throw ValidationException::withMessages([
+                'email' => 'Too many unsuccessful login attempts. Please try again later.',
+            ]);
+        }
+
         // Validate input including recaptcha
         $validated = $request->validate([
             'email' => 'required|email|max:255',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string',
             'g-recaptcha-response' => 'required|string',
         ], [
             'email.required' => 'Email is required.',
             'email.email' => 'Please provide a valid email address.',
             'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
             'g-recaptcha-response.required' => 'Please complete the reCAPTCHA verification.',
         ]);
 
@@ -89,9 +116,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Sanitize email
-        $email = trim($validated['email']);
-
         // Find user by email
         $user = User::where('email', $email)->first();
 
@@ -100,8 +124,30 @@ class AuthController extends Controller
             // Log failed login attempt
             LoggingService::logFailedLogin($email, $request);
 
+            // Increment login attempts with penalty tier duration logic
+            $tier = session($penaltyTierKey, 1);
+            
+            // Penalty Durations: 1st tier = 5 mins, 2nd tier = 15 mins, 3rd tier and above = 30 mins
+            $decayMinutes = 5;
+            if ($tier == 2) {
+                $decayMinutes = 15;
+            } elseif ($tier >= 3) {
+                $decayMinutes = 30;
+            }
+
+            RateLimiter::hit($rateLimitKey, $decayMinutes * 60);
+
+            // If this hit triggered lockout, update the penalty tier for the next penalty
+            if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+                session([$penaltyTierKey => $tier + 1]);
+                $minutes = $decayMinutes;
+                
+                throw ValidationException::withMessages([
+                    'email' => 'Too many unsuccessful login attempts. Please try again later.',
+                ]);
+            }
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'email' => 'The email address or password you entered is incorrect.',
             ]);
         }
 
@@ -117,10 +163,15 @@ class AuthController extends Controller
                 ['reason' => 'User account is inactive']
             );
 
+            // Return the same generic message to avoid revealing account status
             throw ValidationException::withMessages([
-                'email' => 'Your account has been disabled. Please contact support.',
+                'email' => 'The email address or password you entered is incorrect.',
             ]);
         }
+
+        // Clear rate limiter and penalty statistics on successful login
+        RateLimiter::clear($rateLimitKey);
+        session()->forget($penaltyTierKey);
 
         // Check if MFA is enabled for this user
         if ($user->mfa_enabled) {
@@ -350,13 +401,12 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
         ], [
             'name.required' => 'Name is required.',
             'email.required' => 'Email is required.',
-            'email.unique' => 'This email is already registered.',
+            'email.unique' => 'Unable to register with this email address. Please try a different one or reset your password.',
             'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Passwords do not match.',
         ]);
 
@@ -401,15 +451,11 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink($request->only('email'));
+        // Always attempt to send, but show a generic message regardless of outcome
+        // to prevent email enumeration attacks
+        Password::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return back()->with('success', __($status));
-        }
-
-        throw ValidationException::withMessages([
-            'email' => __($status),
-        ]);
+        return back()->with('success', 'If an account with that email exists, we have sent a password reset link. Please check your inbox.');
     }
 
     /**
@@ -431,7 +477,10 @@ class AuthController extends Controller
         $request->validate([
             'token'                 => 'required',
             'email'                 => 'required|email',
-            'password'              => 'required|string|min:8|confirmed',
+            'password'              => ['required', 'string', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
+        ], [
+            'password.required' => 'Password is required.',
+            'password.confirmed' => 'Passwords do not match.',
         ]);
 
         $status = Password::reset(

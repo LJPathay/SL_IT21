@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Services\LoggingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PhishingSimulationMail;
 
 class PhishingController extends Controller
 {
@@ -127,10 +129,12 @@ class PhishingController extends Controller
             'success'
         );
 
-        // In a real implementation, this would queue emails to be sent
-        // For now, we'll simulate the campaign being active
+        // Send phishing emails to all target users
+        foreach ($targetUsers as $user) {
+            Mail::to($user)->send(new PhishingSimulationMail($campaign, $user));
+        }
 
-        return redirect()->route('admin.phishing')->with('success', 'Phishing campaign launched successfully!');
+        return redirect()->route('admin.phishing')->with('success', 'Phishing campaign launched and emails dispatched successfully!');
     }
 
     /**
