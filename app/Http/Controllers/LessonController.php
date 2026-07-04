@@ -62,6 +62,19 @@ class LessonController extends Controller
         if ($request->hasFile('attachment')) {
             $attachment = $request->file('attachment');
             $attachmentName = time() . '_' . $attachment->getClientOriginalName();
+            
+            // 5. Run Malware Scan on attachment file content
+            try {
+                $detectionService = app(\App\Services\SecurityDetectionService::class);
+                $detectionService->detectMalware(
+                    $attachment->getClientOriginalName(),
+                    file_get_contents($attachment->getPathname()),
+                    $attachment->getSize()
+                );
+            } catch (\Exception $e) {
+                // Silence to ensure uploads complete
+            }
+
             $attachment->move(public_path('uploads/lessons/attachments'), $attachmentName);
             $attachmentUrl = 'uploads/lessons/attachments/' . $attachmentName;
             $attachmentName = $attachment->getClientOriginalName();
@@ -160,6 +173,19 @@ class LessonController extends Controller
 
             $attachment = $request->file('attachment');
             $attachmentName = time() . '_' . $attachment->getClientOriginalName();
+
+            // 5. Run Malware Scan on updated attachment content
+            try {
+                $detectionService = app(\App\Services\SecurityDetectionService::class);
+                $detectionService->detectMalware(
+                    $attachment->getClientOriginalName(),
+                    file_get_contents($attachment->getPathname()),
+                    $attachment->getSize()
+                );
+            } catch (\Exception $e) {
+                // Silence scan issues
+            }
+
             $attachment->move(public_path('uploads/lessons/attachments'), $attachmentName);
             $attachmentUrl = 'uploads/lessons/attachments/' . $attachmentName;
             $attachmentName = $attachment->getClientOriginalName();

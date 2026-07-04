@@ -78,12 +78,34 @@ class MessageController extends Controller
             'body.required' => 'Message body is required.',
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => Auth::id(),
             'recipient_id' => $validated['recipient_id'],
             'subject' => $validated['subject'],
             'body' => $validated['body'],
         ]);
+
+        // Run background security assessments (Social Engineering & Phishing Checks)
+        try {
+            $detectionService = app(\App\Services\SecurityDetectionService::class);
+            
+            // 3. Scan for Social Engineering manipulation tactics
+            $detectionService->detectSocialEngineering(
+                $validated['body'],
+                'Message subject: ' . $validated['subject'],
+                $message->id
+            );
+
+            // 4. Scan for Phishing Characteristics inside text
+            $detectionService->detectPhishing(
+                $validated['body'],
+                Auth::user()->email,
+                $validated['subject'],
+                $message->id
+            );
+        } catch (\Exception $e) {
+            // Silence exceptions to keep communication working
+        }
 
         return redirect()->route('messages.inbox')->with('success', 'Message sent successfully!');
     }

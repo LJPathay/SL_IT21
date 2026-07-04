@@ -13,6 +13,53 @@ class ModuleSeeder extends Seeder
     public function run(): void
     {
         $modules = [
+            // Detection Techniques - Available to all roles
+            [
+                'title' => 'Phishing Detection Awareness',
+                'description' => 'Identify characteristics of phishing emails and fraudulent websites.',
+                'category' => 'Detection Techniques',
+                'difficulty' => 'beginner',
+                'duration_minutes' => 45,
+                'required_roles' => ['student', 'instructor', 'admin'],
+                'order' => 1,
+            ],
+            [
+                'title' => 'Social Engineering Detection',
+                'description' => 'Recognize manipulation tactics used by attackers to obtain sensitive information.',
+                'category' => 'Detection Techniques',
+                'difficulty' => 'intermediate',
+                'duration_minutes' => 60,
+                'required_roles' => ['student', 'instructor', 'admin'],
+                'order' => 2,
+            ],
+            [
+                'title' => 'Password Security Assessment',
+                'description' => 'Detect weak password practices and educate users on strong password creation.',
+                'category' => 'Detection Techniques',
+                'difficulty' => 'beginner',
+                'duration_minutes' => 30,
+                'required_roles' => ['student', 'instructor', 'admin'],
+                'order' => 3,
+            ],
+            [
+                'title' => 'Malware Threat Recognition',
+                'description' => 'Identify signs of malware, ransomware, and suspicious software behavior.',
+                'category' => 'Detection Techniques',
+                'difficulty' => 'intermediate',
+                'duration_minutes' => 90,
+                'required_roles' => ['student', 'instructor', 'admin'],
+                'order' => 4,
+            ],
+            [
+                'title' => 'Unsafe Online Activity Detection',
+                'description' => 'Recognize risky online behaviors and potential cybersecurity threats.',
+                'category' => 'Detection Techniques',
+                'difficulty' => 'beginner',
+                'duration_minutes' => 45,
+                'required_roles' => ['student', 'instructor', 'admin'],
+                'order' => 5,
+            ],
+
             // Security Awareness - Available to all roles
             [
                 'title' => 'Phishing Email Recognition',
@@ -21,7 +68,7 @@ class ModuleSeeder extends Seeder
                 'difficulty' => 'beginner',
                 'duration_minutes' => 45,
                 'required_roles' => ['student', 'instructor', 'admin'],
-                'order' => 1,
+                'order' => 6,
             ],
             [
                 'title' => 'Password Security Best Practices',
@@ -30,7 +77,7 @@ class ModuleSeeder extends Seeder
                 'difficulty' => 'beginner',
                 'duration_minutes' => 30,
                 'required_roles' => ['student', 'instructor', 'admin'],
-                'order' => 2,
+                'order' => 7,
             ],
             [
                 'title' => 'Social Engineering Tactics',
@@ -39,7 +86,7 @@ class ModuleSeeder extends Seeder
                 'difficulty' => 'intermediate',
                 'duration_minutes' => 60,
                 'required_roles' => ['student', 'instructor', 'admin'],
-                'order' => 3,
+                'order' => 8,
             ],
 
             // Cybersecurity - Advanced content

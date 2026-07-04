@@ -25,7 +25,6 @@ class CheckRole
 
         // Check if user has one of the required roles
         if (!$user->hasAnyRole($roles)) {
-            // Log unauthorized access (don't include details in abort message)
             LoggingService::logUnauthorizedAccess(
                 'role_check_failed',
                 $user,

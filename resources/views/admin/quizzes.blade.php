@@ -57,22 +57,26 @@
             <h3 class="font-bold text-slate-800 text-lg">Quiz Directory</h3>
 
             @forelse($quizzes as $quiz)
-            <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:border-blue-300 transition-colors">
+            <div class="block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:border-blue-300 transition-colors">
                 <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-                    <div>
+                    <a href="{{ route('admin.quizzes.questions', $quiz) }}" class="flex-1">
                         <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span class="px-2.5 py-0.5 bg-green-150/60 text-green-700 text-xs font-semibold rounded-md">{{ $quiz->module->category ?? 'General' }}</span>
-                            <span class="text-xs text-slate-450">Pass rate: {{ $quiz->passing_score ?? 80 }}%</span>
+                            <span class="text-xs text-slate-450">Pass requirement: {{ $quiz->passing_score ?? 80 }}%</span>
                         </div>
-                        <h4 class="font-bold text-slate-900 text-lg">{{ $quiz->title }}</h4>
-                        <p class="text-slate-500 text-xs mt-0.5">Linked to "{{ $quiz->module->title ?? 'Unknown' }}" module. Passing requirement: {{ $quiz->passing_score ?? 80 }}%</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">{{ $quiz->questions ? $quiz->questions->count() : 0 }} Questions</span>
-                        <svg class="w-5 h-5 text-slate-455" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <h4 class="font-bold text-slate-900 text-lg hover:text-blue-600 transition-colors">{{ $quiz->title }}</h4>
+                        <p class="text-slate-500 text-xs mt-0.5">Linked to "{{ $quiz->module->title ?? 'Unknown' }}" module.</p>
+                    </a>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('admin.quizzes.questions', $quiz) }}" class="text-sm font-semibold text-slate-655 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0 hover:bg-slate-50 transition-colors">
+                            {{ $quiz->questions ? $quiz->questions->count() : 0 }} Questions
+                        </a>
+                        <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="p-2 border border-slate-200 bg-white rounded-lg hover:border-slate-350 hover:bg-slate-50 text-slate-650 hover:text-slate-900 transition-all" title="Edit Quiz Settings">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </a>
                     </div>
                 </div>
-            </a>
+            </div>
             @empty
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-500">
                 <div class="flex flex-col items-center gap-3">

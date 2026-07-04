@@ -257,7 +257,7 @@ class AdminQuizController extends Controller
             'question_text' => $validated['question_text'],
             'question_type' => $validated['question_type'],
             'correct_answer' => $validated['correct_answer'],
-            'options' => $validated['options'] ?? null,
+            'options' => $validated['options'] ?? [],
             'points' => $validated['points'],
             'order' => $validated['order'] ?? 0,
         ]);
@@ -288,6 +288,8 @@ class AdminQuizController extends Controller
             'points' => 'required|integer|min:1|max:100',
             'order' => 'nullable|integer|min:0',
         ]);
+
+        $validated['options'] = $validated['options'] ?? [];
 
         $question->update($validated);
 

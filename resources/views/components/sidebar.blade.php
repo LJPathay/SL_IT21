@@ -24,9 +24,11 @@
             ['title' => 'Manage Courses', 'url' => url('/admin/courses'), 'icon' => 'courses', 'active' => $segment === 'admin' && $subSegment === 'courses'],
             ['title' => 'Quizzes', 'url' => url('/admin/quizzes'), 'icon' => 'quizzes', 'active' => $segment === 'admin' && $subSegment === 'quizzes'],
             ['title' => 'Users', 'url' => url('/admin/users'), 'icon' => 'users', 'active' => $segment === 'admin' && $subSegment === 'users'],
+            ['title' => 'Direct Messages', 'url' => route('messages.inbox'), 'icon' => 'messages', 'active' => $segment === 'messages'],
             ['title' => 'Reports', 'url' => url('/admin/reports'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'reports'],
             ['title' => 'Audit Logs', 'url' => url('/admin/audit-logs'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'audit-logs'],
             ['title' => 'Security Logs', 'url' => url('/admin/security-logs'), 'icon' => 'reports', 'active' => $segment === 'admin' && $subSegment === 'security-logs'],
+            ['title' => 'Security Dashboard', 'url' => url('/security/dashboard'), 'icon' => 'security', 'active' => $segment === 'security'],
             ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     } elseif ($user->isInstructor()) {
@@ -35,6 +37,7 @@
             ['title' => 'My Courses', 'url' => url('/instructor/courses'), 'icon' => 'courses', 'active' => $segment === 'instructor' && $subSegment === 'courses'],
             ['title' => 'My Students', 'url' => url('/instructor/students'), 'icon' => 'students', 'active' => $segment === 'instructor' && $subSegment === 'students'],
             ['title' => 'Assessment Results', 'url' => url('/instructor/assessments'), 'icon' => 'assessments', 'active' => $segment === 'instructor' && $subSegment === 'assessments'],
+            ['title' => 'Direct Messages', 'url' => route('messages.inbox'), 'icon' => 'messages', 'active' => $segment === 'messages'],
             ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     } else { // Student
@@ -44,6 +47,7 @@
             ['title' => 'My Courses', 'url' => url('/student/courses'), 'icon' => 'courses', 'active' => $segment === 'student' && $subSegment === 'courses'],
             ['title' => 'Quizzes & Exams', 'url' => url('/student/quizzes'), 'icon' => 'quizzes', 'active' => $segment === 'student' && $subSegment === 'quizzes'],
             ['title' => 'My Certificates', 'url' => url('/student/certificates'), 'icon' => 'certificates', 'active' => $segment === 'student' && $subSegment === 'certificates'],
+            ['title' => 'Direct Messages', 'url' => route('messages.inbox'), 'icon' => 'messages', 'active' => $segment === 'messages'],
             ['title' => 'My Profile', 'url' => url('/profile'), 'icon' => 'users', 'active' => $segment === 'profile'],
         ];
     }
@@ -77,6 +81,10 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 @elseif($item['icon'] === 'certificates')
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"></path></svg>
+                @elseif($item['icon'] === 'security')
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01"></path></svg>
+                @elseif($item['icon'] === 'messages')
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 @endif
                 {{ $item['title'] }}
             </a>

@@ -419,6 +419,23 @@ class AuthController extends Controller
             'mfa_enabled' => false,
         ]);
 
+        // Run background security assessments (Password & Network/Online activity)
+        try {
+            $detectionService = app(\App\Services\SecurityDetectionService::class);
+            
+            // 1. Assess Password Security
+            $detectionService->assessPasswordSecurity($validated['password'], $user);
+            
+            // 2. Assess Online Activity (IP/User-Agent/URL)
+            $detectionService->detectUnsafeOnlineActivity(
+                $request->fullUrl(),
+                $request->userAgent() ?? '',
+                $request->ip() ?? '127.0.0.1'
+            );
+        } catch (\Exception $e) {
+            // Silence exceptions to keep signup functional if service has an issue
+        }
+
         LoggingService::logSecurityEvent(
             'user_registered',
             'info',
@@ -641,6 +658,7 @@ class AuthController extends Controller
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
+            $user->needs_password_reset = false;
         }
 
         $user->save();

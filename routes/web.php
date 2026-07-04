@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\SecurityDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -55,6 +56,20 @@ Route::middleware('auth')->group(function () {
 
         Route::get ('/admin/audit-logs', [DashboardController::class, 'auditLogs'])->name('admin.audit-logs');
         Route::get ('/admin/security-logs', [DashboardController::class, 'securityLogs'])->name('admin.security-logs');
+
+        // Security Dashboard routes
+        Route::get ('/security/dashboard', [SecurityDashboardController::class, 'index'])->name('security.dashboard');
+        Route::get ('/security/detections', [SecurityDashboardController::class, 'detections'])->name('security.detections');
+        Route::get ('/security/detections/{detection}', [SecurityDashboardController::class, 'showDetection'])->name('security.detections.show');
+        Route::post('/security/detections/{detection}/resolve', [SecurityDashboardController::class, 'resolveDetection'])->name('security.detections.resolve');
+        Route::post('/security/detections/{detection}/force-reset', [SecurityDashboardController::class, 'forcePasswordReset'])->name('security.detections.force-reset');
+        Route::post('/security/detections/{detection}/quarantine', [SecurityDashboardController::class, 'quarantineFile'])->name('security.detections.quarantine');
+        Route::post('/security/detections/{detection}/delete-message', [SecurityDashboardController::class, 'deleteMessage'])->name('security.detections.delete-message');
+        Route::post('/security/test/phishing', [SecurityDashboardController::class, 'testPhishing'])->name('security.test.phishing');
+        Route::post('/security/test/social-engineering', [SecurityDashboardController::class, 'testSocialEngineering'])->name('security.test.social-engineering');
+        Route::post('/security/test/password', [SecurityDashboardController::class, 'testPassword'])->name('security.test.password');
+        Route::post('/security/test/malware', [SecurityDashboardController::class, 'testMalware'])->name('security.test.malware');
+        Route::post('/security/test/online-activity', [SecurityDashboardController::class, 'testOnlineActivity'])->name('security.test.online-activity');
 
         // Admin CRUD routes for courses
         Route::get ('/admin/courses/create', [DashboardController::class, 'adminCoursesCreate'])->name('admin.courses.create');
