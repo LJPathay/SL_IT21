@@ -118,6 +118,34 @@ class ModuleController extends Controller
     }
 
     /**
+     * Show the learning path for a module.
+     */
+    public function showLearningPath(Module $module)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            $requiredRoles = $module->required_roles ?? [];
+            if (!empty($requiredRoles) && !in_array($user->role, $requiredRoles)) {
+                abort(403, 'Unauthorized');
+            }
+        }
+
+        $lessons = $module->lessons()->published()->ordered()->get();
+
+        if ($lessons->isNotEmpty()) {
+            return redirect()->route('lessons.show', [$module, $lessons->first()]);
+        }
+
+        return view('learn.show', [
+            'module' => $module,
+            'lessons' => $lessons,
+            'currentLesson' => null,
+            'progressPercentage' => 0,
+        ]);
+    }
+
+    /**
      * Enroll user in a module.
      */
     public function enroll(Module $module)

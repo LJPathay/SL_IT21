@@ -330,7 +330,7 @@ class DashboardController extends Controller
     {
         $instructors = User::where('role', 'instructor')->where('is_active', true)->get();
 
-        return view('admin.courses', [
+        return view('admin.courses-create', [
             'instructors' => $instructors,
         ]);
     }
@@ -435,7 +435,7 @@ class DashboardController extends Controller
     {
         $courses = Course::orderBy('title')->get();
 
-        return view('admin.modules', [
+        return view('admin.modules-create', [
             'courses' => $courses,
         ]);
     }
@@ -589,7 +589,7 @@ class DashboardController extends Controller
     {
         $modules = Module::orderBy('title')->get();
 
-        return view('admin.quizzes', [
+        return view('admin.quizzes-create', [
             'modules' => $modules,
         ]);
     }
@@ -755,7 +755,9 @@ class DashboardController extends Controller
         $user = Auth::user();
         $courses = $user->taughtCourses();
         $query = UserEnrollment::whereIn('course_id', $courses->pluck('id'))
-            ->with('user')
+            ->with(['user.quizResults' => function ($q) {
+                $q->whereNotNull('completed_at');
+            }, 'course'])
             ->where('status', 'active');
 
         // Search filter
@@ -917,6 +919,56 @@ class DashboardController extends Controller
     }
 
     /**
+     * Student leaderboard page with ranked learners.
+     */
+    public function studentLeaderboard(Request $request)
+    {
+        $user = Auth::user();
+
+        $rankedUsers = User::where('role', 'student')
+            ->where('is_active', true)
+            ->with(['quizResults' => function ($query) {
+                $query->whereNotNull('completed_at');
+            }, 'enrollments'])
+            ->get()
+            ->map(function ($student) {
+                $quizScoreTotal = (float) $student->quizResults->sum('score');
+                $completedModules = $student->enrollments->where('status', 'completed')->count();
+                $activeProgress = (float) $student->enrollments->where('status', 'active')->sum('progress_percentage');
+
+                $student->score = (int) round($quizScoreTotal + ($completedModules * 100) + $activeProgress);
+                $student->completedModules = $completedModules;
+                $student->department = $student->department ?? 'General';
+
+                return $student;
+            })
+            ->sortByDesc('score')
+            ->values();
+
+        $user->score = $rankedUsers->firstWhere('id', $user->id)?->score ?? 0;
+        $user->completedModules = $rankedUsers->firstWhere('id', $user->id)?->completedModules ?? 0;
+        $user->department = $rankedUsers->firstWhere('id', $user->id)?->department ?? 'General';
+
+        $rankedUsers->each(function ($student, $index) {
+            $student->rank = $index + 1;
+        });
+
+        $currentRank = $rankedUsers->firstWhere('id', $user->id)?->rank ?? null;
+        $departmentAverages = $rankedUsers->groupBy('department')->map(function ($students) {
+            return round($students->avg('score'));
+        })->sortByDesc(function ($score) {
+            return $score;
+        });
+
+        return view('student.leaderboard', [
+            'rankedUsers' => $rankedUsers,
+            'currentRank' => $currentRank,
+            'currentUser' => $user,
+            'departmentAverages' => $departmentAverages,
+        ]);
+    }
+
+    /**
      * Student courses page with enrolled courses.
      */
     public function studentCourses(Request $request)
@@ -945,11 +997,13 @@ class DashboardController extends Controller
             ->latest('completed_at')
             ->paginate(10);
 
-        $completedQuizIds = $completedQuizzes->pluck('quiz_id');
-        $availableQuizzes = Quiz::whereHas('module', function ($query) use ($user) {
-            $query->whereJsonContains('required_roles', $user->role)
-                  ->orWhereNull('required_roles');
-        })->whereNotIn('id', $completedQuizIds)
+        $completedQuizIds = $user->quizResults()->pluck('quiz_id')->unique()->toArray();
+        $availableQuizzes = Quiz::with('module')
+            ->whereHas('module', function ($query) use ($user) {
+                $query->whereJsonContains('required_roles', $user->role)
+                      ->orWhereNull('required_roles');
+            })
+            ->whereNotIn('id', $completedQuizIds)
             ->get();
 
         // Compute average over ALL results (not just current page)
@@ -974,7 +1028,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $certificates = $user->certificates()
-            ->with('module')
+            ->with(['module', 'user'])
             ->where(function ($query) {
                 $query->where('expires_at', '>', now())
                       ->orWhereNull('expires_at');

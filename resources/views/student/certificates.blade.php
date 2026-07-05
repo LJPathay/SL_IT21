@@ -35,7 +35,7 @@
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
                 <button onclick="toggleCertModal(true, {
                     id: '{{ $cert->id }}',
-                    recipient: '{{ addslashes($cert->user->name) }}',
+                    recipient: '{{ addslashes($cert->user->name ?? 'Learner') }}',
                     module: '{{ addslashes($cert->module->title ?? 'Certificate') }}',
                     credential_id: '{{ $cert->credential_id ?? $cert->certificate_number }}'
                 })" class="w-full text-center py-2 bg-white border border-blue-200 text-blue-700 font-bold rounded-lg hover:bg-blue-600 hover:text-white transition-all text-xs">

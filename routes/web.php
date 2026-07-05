@@ -146,9 +146,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/modules/{module}/complete', [ModuleController::class, 'complete'])->name('modules.complete');
     Route::put('/modules/{module}/progress', [ModuleController::class, 'updateProgress'])->name('modules.updateProgress');
 
-    Route::get('/learn/{id}', function ($id) {
-        return view('learn.show', ['id' => $id]);
-    })->name('learn.show');
+    Route::get('/learn/{module}', [ModuleController::class, 'showLearningPath'])->name('learn.show');
 
     // Lesson routes
     Route::get('/modules/{module}/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');
@@ -176,6 +174,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/student/certificates/{certificate}/download', [DashboardController::class, 'downloadCertificate'])->name('student.certificates.download');
         Route::get('/student/inbox', [DashboardController::class, 'studentInbox'])->name('student.inbox');
     });
+
+    Route::get('/student/leaderboard', [DashboardController::class, 'studentLeaderboard'])->name('student.leaderboard');
 });
 
 // Module view routes - accessible to guests (catalog browsing)

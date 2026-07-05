@@ -63,7 +63,7 @@
             <!-- Attachment Upload -->
             <div>
                 <label for="attachment" class="block text-sm font-semibold text-slate-700 mb-1">Lesson Attachment (Optional)</label>
-                <input type="file" name="attachment" id="attachment" accept=".pdf,.ppt,.pptx,.doc,.docx"
+                <input type="file" name="attachment" id="attachment"
                     class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                 @if($lesson->attachment_url)
                     <div class="mt-2">
@@ -73,7 +73,7 @@
                         </a>
                     </div>
                 @endif
-                <p class="mt-1 text-xs text-slate-500">Accepted formats: PDF, PPT, PPTX, DOC, DOCX. Max size: 10MB</p>
+                <p class="mt-1 text-xs text-slate-500">Accepted formats: any file type allowed for security demos. Max size: 10MB</p>
                 @error('attachment')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror

@@ -6,6 +6,9 @@ use App\Models\AuditLog;
 use App\Models\SecurityLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class LoggingService
 {
@@ -20,7 +23,13 @@ class LoggingService
         ?array $changes = null,
         ?Request $request = null,
         string $status = 'success'
-    ): AuditLog {
+    ): ?AuditLog {
+        if (!Schema::hasTable('audit_logs')) {
+            Log::warning('Audit logging skipped because audit_logs table is not available.');
+
+            return null;
+        }
+
         return AuditLog::create([
             'user_id' => $user?->id,
             'action' => $action,
@@ -44,7 +53,13 @@ class LoggingService
         ?string $endpoint = null,
         ?int $responseCode = null,
         ?array $details = null
-    ): SecurityLog {
+    ): ?SecurityLog {
+        if (!Schema::hasTable('security_logs')) {
+            Log::warning('Security logging skipped because security_logs table is not available.');
+
+            return null;
+        }
+
         return SecurityLog::create([
             'user_id' => $user?->id,
             'event_type' => $eventType,

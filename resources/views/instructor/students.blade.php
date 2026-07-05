@@ -72,8 +72,8 @@
                                 <span class="text-xs font-bold text-slate-600">{{ $enrollment->progress_percentage ?? 0 }}%</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm font-semibold text-green-600">N/A</td>
-                        <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $enrollment->updated_at ? $enrollment->updated_at->diffForHumans() : 'N/A' }}</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-green-600">{{ $enrollment->user->quizResults->avg('score') ? round($enrollment->user->quizResults->avg('score'), 1) : 0 }}%</td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $enrollment->user->last_login_at ? $enrollment->user->last_login_at->diffForHumans() : ($enrollment->updated_at ? $enrollment->updated_at->diffForHumans() : 'N/A') }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
                                 <button onclick="toggleMessageModal('{{ $enrollment->user->email ?? '' }}', {{ $enrollment->user->id ?? 0 }})" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors">Message</button>

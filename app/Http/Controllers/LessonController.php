@@ -34,7 +34,7 @@ class LessonController extends Controller
             'order' => 'nullable|integer|min:0',
             'is_published' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attachment' => 'nullable|mimes:pdf,ppt,pptx,doc,docx|max:10240',
+            'attachment' => 'nullable|file|max:10240',
         ], [
             'title.required' => 'Lesson title is required.',
             'content.required' => 'Lesson content is required.',
@@ -42,7 +42,7 @@ class LessonController extends Controller
             'image.image' => 'The file must be an image.',
             'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
             'image.max' => 'The image may not be greater than 2MB.',
-            'attachment.mimes' => 'The attachment must be a file of type: pdf, ppt, pptx, doc, docx.',
+            'attachment.file' => 'The attachment must be a valid file.',
             'attachment.max' => 'The attachment may not be greater than 10MB.',
         ]);
 
@@ -138,7 +138,7 @@ class LessonController extends Controller
             'order' => 'nullable|integer|min:0',
             'is_published' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'attachment' => 'nullable|mimes:pdf,ppt,pptx,doc,docx|max:10240',
+            'attachment' => 'nullable|file|max:10240',
         ], [
             'title.required' => 'Lesson title is required.',
             'content.required' => 'Lesson content is required.',
@@ -146,7 +146,7 @@ class LessonController extends Controller
             'image.image' => 'The file must be an image.',
             'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
             'image.max' => 'The image may not be greater than 2MB.',
-            'attachment.mimes' => 'The attachment must be a file of type: pdf, ppt, pptx, doc, docx.',
+            'attachment.file' => 'The attachment must be a valid file.',
             'attachment.max' => 'The attachment may not be greater than 10MB.',
         ]);
 
