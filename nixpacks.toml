@@ -1,7 +1,8 @@
 # Railway Nixpacks configuration for Laravel + Vite
 
+# Ensure both PHP and Node.js providers are used
 [phases.setup]
-nixPkgs = ["...", "php84Extensions.pdo_mysql", "php84Extensions.mysql"]
+nixPkgs = ["...", "php84Extensions.pdo_mysql", "php84Extensions.mysql", "nodejs_20", "npm-9_x"]
 
 [phases.install]
 cmds = ["composer install --no-dev --optimize-autoloader", "npm ci"]
@@ -10,4 +11,4 @@ cmds = ["composer install --no-dev --optimize-autoloader", "npm ci"]
 cmds = ["npm run build", "php artisan optimize", "php artisan view:cache"]
 
 [start]
-cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
+cmd = "php artisan migrate --force; php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
