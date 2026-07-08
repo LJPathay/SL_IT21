@@ -52,10 +52,21 @@ class MessageController extends Controller
      */
     public function create()
     {
+        $currentUser = Auth::user();
+
+        // Role-based recipient filtering
         $recipients = User::where('id', '!=', Auth::id())
             ->where('is_active', true)
+            ->when($currentUser->role === 'student', function ($query) {
+                // Students can only message instructors, not admins
+                $query->where('role', 'instructor');
+            })
+            ->when(in_array($currentUser->role, ['instructor', 'admin']), function ($query) {
+                // Instructors and admins can message anyone except themselves
+                $query->where('role', '!=', 'admin');
+            })
             ->orderBy('name')
-            ->get();
+            ->get(['id', 'name', 'email', 'role', 'department']);
 
         return view('messages.create', [
             'recipients' => $recipients,
