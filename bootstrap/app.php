@@ -19,11 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'bot.detection' => \App\Http\Middleware\BotDetection::class,
             'throttle.api' => \App\Http\Middleware\ApiThrottle::class,
         ]);
-        
+
         $middleware->web(append: [
             \App\Http\Middleware\LogSecurityEvent::class,
             \App\Http\Middleware\PasswordResetRequired::class,
+<<<<<<< HEAD
             \App\Http\Middleware\BotDetection::class,
+=======
+            \App\Http\Middleware\SecurityHeaders::class,
+>>>>>>> f992483d7ae2f99291950dc1784331c65a2c0745
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

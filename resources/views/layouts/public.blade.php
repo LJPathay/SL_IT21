@@ -68,5 +68,39 @@
     </footer>
 
     @stack('scripts')
+
+    <!-- Security: Disable inspection tools (deterrent only, not foolproof) -->
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.key === 'U') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C')) {
+                e.preventDefault();
+            }
+        });
+
+        // Detect devtools open
+        let devtools = { open: false };
+        setInterval(function() {
+            const threshold = 160;
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    console.clear();
+                    console.log('%cSecurity Notice', 'color: red; font-size: 20px; font-weight: bold;');
+                    console.log('%cThis application is protected. Unauthorized access is monitored.', 'color: red; font-size: 14px;');
+                }
+            } else {
+                devtools.open = false;
+            }
+        }, 500);
+    </script>
 </body>
 </html>
