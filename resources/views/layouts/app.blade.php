@@ -272,5 +272,114 @@
         }, 500);
     </script>
 
+    @if(auth()->check())
+    <!-- Session Timeout Warning -->
+    <script>
+        const SESSION_TIMEOUT = 3 * 60 * 1000; // 3 minutes in milliseconds
+        const WARNING_TIME = 30 * 1000; // Show warning 30 seconds before timeout
+        let timeoutTimer;
+        let warningTimer;
+        let lastActivity = Date.now();
+
+        function resetSessionTimer() {
+            lastActivity = Date.now();
+            clearTimeout(timeoutTimer);
+            clearTimeout(warningTimer);
+            
+            // Set warning timer
+            warningTimer = setTimeout(showSessionWarning, SESSION_TIMEOUT - WARNING_TIME);
+            
+            // Set logout timer
+            timeoutTimer = setTimeout(logoutUser, SESSION_TIMEOUT);
+        }
+
+        function showSessionWarning() {
+            const modal = document.createElement('div');
+            modal.id = 'session-warning-modal';
+            modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in-up">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Session Expiring Soon</h3>
+                        <p class="text-slate-600 mb-6">Your session will expire in 30 seconds due to inactivity. Would you like to stay logged in?</p>
+                        <div class="flex gap-3 justify-center">
+                            <button onclick="extendSession()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+                                Stay Logged In
+                            </button>
+                            <button onclick="logoutUser()" class="px-6 py-2.5 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors">
+                                Log Out
+                            </button>
+                        </div>
+                        <div class="mt-4">
+                            <div class="text-sm text-slate-500 mb-2">Time remaining: <span id="session-countdown">30</span> seconds</div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div id="session-progress" class="bg-amber-500 h-2 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Start countdown
+            let countdown = 30;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                const countdownEl = document.getElementById('session-countdown');
+                const progressEl = document.getElementById('session-progress');
+                if (countdownEl) countdownEl.textContent = countdown;
+                if (progressEl) progressEl.style.width = (countdown / 30 * 100) + '%';
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        function extendSession() {
+            const modal = document.getElementById('session-warning-modal');
+            if (modal) modal.remove();
+            
+            // Ping server to refresh session
+            fetch('/auth/refresh', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => {
+                resetSessionTimer();
+            }).catch(() => {
+                resetSessionTimer();
+            });
+        }
+
+        function logoutUser() {
+            const modal = document.getElementById('session-warning-modal');
+            if (modal) modal.remove();
+            window.location.href = '/logout';
+        }
+
+        // Track user activity
+        const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        activityEvents.forEach(event => {
+            document.addEventListener(event, () => {
+                const timeSinceActivity = Date.now() - lastActivity;
+                if (timeSinceActivity > 5000) { // Only reset if 5+ seconds since last activity
+                    resetSessionTimer();
+                }
+            }, true);
+        });
+
+        // Initialize timer on page load
+        document.addEventListener('DOMContentLoaded', resetSessionTimer);
+    </script>
+    @endif
+
 </body>
 </html>
