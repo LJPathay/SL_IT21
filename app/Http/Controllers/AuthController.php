@@ -30,19 +30,30 @@ class AuthController extends Controller
             return false;
         }
 
+        // Skip reCAPTCHA verification if keys are not configured (local dev)
+        if (empty(config('services.recaptcha.secret_key')) || empty(config('services.recaptcha.site_key'))) {
+            return true;
+        }
+
         // On Windows local dev, PHP cURL lacks a CA bundle (SSL error 60).
         // Skip verification only in local; production always verifies.
         $http = app()->isLocal()
             ? Http::withoutVerifying()->asForm()
             : Http::asForm();
 
-        $res = $http->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => config('services.recaptcha.secret_key'),
-            'response' => $response,
-            'remoteip' => $ip,
-        ]);
+        try {
+            $res = $http->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => config('services.recaptcha.secret_key'),
+                'response' => $response,
+                'remoteip' => $ip,
+            ]);
 
-        return $res->successful() && $res->json('success') === true;
+            return $res->successful() && $res->json('success') === true;
+        } catch (\Exception $e) {
+            // Log error but allow login if reCAPTCHA service is down
+            \Log::warning('reCAPTCHA verification failed', ['error' => $e->getMessage()]);
+            return true;
+        }
     }
 
     /**
