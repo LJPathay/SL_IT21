@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\EncryptionService;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -11,13 +12,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\App;
 
-#[Fillable(['name', 'email', 'password', 'role', 'is_active', 'department', 'last_login_at', 'profile_picture'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'role', 'is_active', 'department', 'last_login_at', 'profile_picture', 'email_encrypted', 'name_encrypted', 'department_encrypted'])]
+#[Hidden(['password', 'remember_token', 'email_encrypted', 'name_encrypted', 'department_encrypted'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            $encryptionService = App::make(EncryptionService::class);
+            $user->email_encrypted = $encryptionService->encryptNullable($user->email);
+            $user->name_encrypted = $encryptionService->encryptNullable($user->name);
+            $user->department_encrypted = $encryptionService->encryptNullable($user->department);
+        });
+
+        static::updating(function ($user) {
+            $encryptionService = App::make(EncryptionService::class);
+            if ($user->isDirty('email')) {
+                $user->email_encrypted = $encryptionService->encryptNullable($user->email);
+            }
+            if ($user->isDirty('name')) {
+                $user->name_encrypted = $encryptionService->encryptNullable($user->name);
+            }
+            if ($user->isDirty('department')) {
+                $user->department_encrypted = $encryptionService->encryptNullable($user->department);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -32,6 +57,30 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get decrypted email
+     */
+    public function getDecryptedEmail(): string
+    {
+        return $this->email;
+    }
+
+    /**
+     * Get decrypted name
+     */
+    public function getDecryptedName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get decrypted department
+     */
+    public function getDecryptedDepartment(): ?string
+    {
+        return $this->department;
     }
 
     /**

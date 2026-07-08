@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\EncryptionService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\App;
 
 class SecurityDetection extends Model
 {
@@ -19,12 +21,44 @@ class SecurityDetection extends Model
         'resolved_at',
         'resolved_by',
         'mitigation_steps',
+        'source_encrypted',
+        'source_id_encrypted',
+        'details_encrypted',
+    ];
+
+    protected $hidden = [
+        'source_encrypted',
+        'source_id_encrypted',
+        'details_encrypted',
     ];
 
     protected $casts = [
         'is_resolved' => 'boolean',
         'resolved_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($detection) {
+            $encryptionService = App::make(EncryptionService::class);
+            $detection->source_encrypted = $encryptionService->encryptNullable($detection->source);
+            $detection->source_id_encrypted = $encryptionService->encryptNullable($detection->source_id);
+            $detection->details_encrypted = $encryptionService->encryptNullable($detection->details);
+        });
+
+        static::updating(function ($detection) {
+            $encryptionService = App::make(EncryptionService::class);
+            if ($detection->isDirty('source')) {
+                $detection->source_encrypted = $encryptionService->encryptNullable($detection->source);
+            }
+            if ($detection->isDirty('source_id')) {
+                $detection->source_id_encrypted = $encryptionService->encryptNullable($detection->source_id);
+            }
+            if ($detection->isDirty('details')) {
+                $detection->details_encrypted = $encryptionService->encryptNullable($detection->details);
+            }
+        });
+    }
 
     // Detection types
     const TYPE_PHISHING = 'phishing';

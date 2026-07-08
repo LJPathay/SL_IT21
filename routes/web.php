@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminQuizController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\PhishingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
@@ -19,21 +20,25 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle.login')->name('login.post');
     Route::get('/login/mfa', [AuthController::class, 'showMfaForm'])->name('login.mfa');
-    Route::post('/login/mfa', [AuthController::class, 'verifyMfa'])->name('login.mfa.post');
+    Route::post('/login/mfa', [AuthController::class, 'verifyMfa'])->middleware('throttle.login')->name('login.mfa.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle.login')->name('register.post');
 
     // Password reset
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle.login')->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth')->name('auth.refresh');
+
+// CAPTCHA routes (no auth required)
+Route::get('/captcha/generate', [CaptchaController::class, 'generate'])->middleware('throttle.api:30,1')->name('captcha.generate');
+Route::post('/captcha/validate', [CaptchaController::class, 'validate'])->middleware('throttle.api:30,1')->name('captcha.validate');
 
 Route::middleware('auth')->group(function () {
     Route::post('/security/mfa/toggle', [AuthController::class, 'toggleMfa'])->name('security.mfa.toggle');
@@ -65,11 +70,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/security/detections/{detection}/force-reset', [SecurityDashboardController::class, 'forcePasswordReset'])->name('security.detections.force-reset');
         Route::post('/security/detections/{detection}/quarantine', [SecurityDashboardController::class, 'quarantineFile'])->name('security.detections.quarantine');
         Route::post('/security/detections/{detection}/delete-message', [SecurityDashboardController::class, 'deleteMessage'])->name('security.detections.delete-message');
-        Route::post('/security/test/phishing', [SecurityDashboardController::class, 'testPhishing'])->name('security.test.phishing');
-        Route::post('/security/test/social-engineering', [SecurityDashboardController::class, 'testSocialEngineering'])->name('security.test.social-engineering');
-        Route::post('/security/test/password', [SecurityDashboardController::class, 'testPassword'])->name('security.test.password');
-        Route::post('/security/test/malware', [SecurityDashboardController::class, 'testMalware'])->name('security.test.malware');
-        Route::post('/security/test/online-activity', [SecurityDashboardController::class, 'testOnlineActivity'])->name('security.test.online-activity');
+        Route::post('/security/test/phishing', [SecurityDashboardController::class, 'testPhishing'])->middleware('throttle.api:10,1')->name('security.test.phishing');
+        Route::post('/security/test/social-engineering', [SecurityDashboardController::class, 'testSocialEngineering'])->middleware('throttle.api:10,1')->name('security.test.social-engineering');
+        Route::post('/security/test/password', [SecurityDashboardController::class, 'testPassword'])->middleware('throttle.api:10,1')->name('security.test.password');
+        Route::post('/security/test/malware', [SecurityDashboardController::class, 'testMalware'])->middleware('throttle.api:10,1')->name('security.test.malware');
+        Route::post('/security/test/online-activity', [SecurityDashboardController::class, 'testOnlineActivity'])->middleware('throttle.api:10,1')->name('security.test.online-activity');
 
         // Admin CRUD routes for courses
         Route::get ('/admin/courses/create', [DashboardController::class, 'adminCoursesCreate'])->name('admin.courses.create');

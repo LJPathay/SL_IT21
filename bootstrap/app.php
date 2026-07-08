@@ -15,11 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'guest' => \App\Http\Middleware\Guest::class,
             'role' => \App\Http\Middleware\CheckRole::class,
+            'throttle.login' => \App\Http\Middleware\RateLimitLogin::class,
+            'bot.detection' => \App\Http\Middleware\BotDetection::class,
+            'throttle.api' => \App\Http\Middleware\ApiThrottle::class,
         ]);
         
         $middleware->web(append: [
             \App\Http\Middleware\LogSecurityEvent::class,
             \App\Http\Middleware\PasswordResetRequired::class,
+            \App\Http\Middleware\BotDetection::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

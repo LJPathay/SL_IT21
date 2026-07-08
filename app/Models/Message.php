@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\EncryptionService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\App;
 
 class Message extends Model
 {
@@ -17,12 +19,38 @@ class Message extends Model
         'body',
         'is_read',
         'read_at',
+        'subject_encrypted',
+        'body_encrypted',
+    ];
+
+    protected $hidden = [
+        'subject_encrypted',
+        'body_encrypted',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
         'read_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($message) {
+            $encryptionService = App::make(EncryptionService::class);
+            $message->subject_encrypted = $encryptionService->encryptNullable($message->subject);
+            $message->body_encrypted = $encryptionService->encryptNullable($message->body);
+        });
+
+        static::updating(function ($message) {
+            $encryptionService = App::make(EncryptionService::class);
+            if ($message->isDirty('subject')) {
+                $message->subject_encrypted = $encryptionService->encryptNullable($message->subject);
+            }
+            if ($message->isDirty('body')) {
+                $message->body_encrypted = $encryptionService->encryptNullable($message->body);
+            }
+        });
+    }
 
     // Relationships
     public function sender()
