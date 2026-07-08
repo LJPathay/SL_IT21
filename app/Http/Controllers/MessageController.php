@@ -58,11 +58,15 @@ class MessageController extends Controller
         $recipients = User::where('id', '!=', Auth::id())
             ->where('is_active', true)
             ->when($currentUser->role === 'student', function ($query) {
-                // Students can only message instructors, not admins
+                // Students can only message instructors
                 $query->where('role', 'instructor');
             })
-            ->when(in_array($currentUser->role, ['instructor', 'admin']), function ($query) {
-                // Instructors and admins can message anyone except themselves
+            ->when($currentUser->role === 'instructor', function ($query) {
+                // Instructors can message students and other instructors
+                $query->whereIn('role', ['student', 'instructor']);
+            })
+            ->when($currentUser->role === 'admin', function ($query) {
+                // Admins can message everyone except other admins
                 $query->where('role', '!=', 'admin');
             })
             ->orderBy('name')

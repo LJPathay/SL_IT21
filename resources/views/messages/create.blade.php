@@ -36,7 +36,7 @@
                     <input type="hidden" name="recipient_id" id="recipient_id" value="{{ old('recipient_id') }}">
                     
                     {{-- Search Results Dropdown --}}
-                    <div id="recipient_results" class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-64 overflow-y-auto hidden">
+                    <div id="recipient_results" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-64 overflow-y-auto hidden">
                         <div class="p-2 text-sm text-slate-500">Start typing to search...</div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
     searchInput.addEventListener('input', function() {
         const query = this.value.toLowerCase().trim();
         
-        if (query.length < 2) {
+        if (query.length < 1) {
             resultsDiv.classList.add('hidden');
             return;
         }
@@ -134,7 +134,6 @@
                 </div>
             `).join('');
 
-            // Add click handlers
             resultsDiv.querySelectorAll('.recipient-option').forEach(option => {
                 option.addEventListener('click', function() {
                     selectRecipient(this.dataset.id, this.dataset.name);
@@ -159,14 +158,12 @@
         searchInput.focus();
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
         if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
             resultsDiv.classList.add('hidden');
         }
     });
 
-    // Handle keyboard navigation
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             resultsDiv.classList.add('hidden');
