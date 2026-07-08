@@ -362,7 +362,24 @@
         function logoutUser() {
             const modal = document.getElementById('session-warning-modal');
             if (modal) modal.remove();
-            window.location.href = '/logout';
+            
+            // Create and submit a POST form for logout
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout';
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
         }
 
         // Track user activity
