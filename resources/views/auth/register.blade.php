@@ -102,6 +102,14 @@
                 <p id="password-match-msg" class="text-xs mt-1 hidden"></p>
             </div>
 
+            {{-- Google reCAPTCHA v2 --}}
+            <div>
+                <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
+                @error('g-recaptcha-response')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <button type="submit" id="register-submit-btn" class="w-full py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 Sign Up
             </button>
@@ -130,6 +138,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const pwField = document.getElementById('password');

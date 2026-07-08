@@ -402,13 +402,32 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => ['required', 'string', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()],
+            'g-recaptcha-response' => 'required|string',
         ], [
             'name.required' => 'Name is required.',
             'email.required' => 'Email is required.',
             'email.unique' => 'Unable to register with this email address. Please try a different one or reset your password.',
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Passwords do not match.',
+            'g-recaptcha-response.required' => 'Please complete the reCAPTCHA verification.',
         ]);
+
+        // Validate reCAPTCHA
+        if (!$this->verifyRecaptcha($request->input('g-recaptcha-response'), $request->ip())) {
+            LoggingService::logSecurityEvent(
+                'failed_captcha_attempt',
+                'warning',
+                null,
+                $request,
+                '/register',
+                422,
+                ['email' => $request->input('email')]
+            );
+
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.',
+            ]);
+        }
 
         $user = User::create([
             'name' => $validated['name'],

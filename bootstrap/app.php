@@ -16,10 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => \App\Http\Middleware\Guest::class,
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
-        
+
         $middleware->web(append: [
             \App\Http\Middleware\LogSecurityEvent::class,
             \App\Http\Middleware\PasswordResetRequired::class,
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
