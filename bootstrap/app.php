@@ -21,8 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
-            // Temporarily disabled to debug 500 error
-            // \App\Http\Middleware\PasswordResetRequired::class,
+            \App\Http\Middleware\PasswordResetRequired::class,
+            \App\Http\Middleware\BotDetection::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
