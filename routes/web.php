@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\AdminQuizController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\PhishingController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
@@ -35,10 +34,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth')->name('auth.refresh');
-
-// CAPTCHA routes (no auth required)
-Route::get('/captcha/generate', [CaptchaController::class, 'generate'])->middleware('throttle.api:30,1')->name('captcha.generate');
-Route::post('/captcha/validate', [CaptchaController::class, 'validate'])->middleware('throttle.api:30,1')->name('captcha.validate');
 
 Route::middleware('auth')->group(function () {
     Route::post('/security/mfa/toggle', [AuthController::class, 'toggleMfa'])->name('security.mfa.toggle');

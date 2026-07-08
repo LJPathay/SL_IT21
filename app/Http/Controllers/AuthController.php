@@ -87,42 +87,20 @@ class AuthController extends Controller
             ]);
         }
 
-        // Validate input including custom CAPTCHA
+        // Validate input including reCAPTCHA
         $validated = $request->validate([
             'email' => 'required|email|max:255',
             'password' => 'required|string',
-            'captcha_id' => 'required|string',
-            'captcha_answer' => 'required|integer',
+            'g-recaptcha-response' => 'required|string',
         ], [
             'email.required' => 'Email is required.',
             'email.email' => 'Please provide a valid email address.',
             'password.required' => 'Password is required.',
-            'captcha_id.required' => 'Security check failed. Please refresh the page.',
-            'captcha_answer.required' => 'Please answer the security question.',
+            'g-recaptcha-response.required' => 'Please complete the reCAPTCHA verification.',
         ]);
 
-        // Validate custom CAPTCHA
-        $captchaId = $validated['captcha_id'];
-        $captchaAnswer = $validated['captcha_answer'];
-        $correctAnswer = \Illuminate\Support\Facades\Cache::get("captcha:{$captchaId}");
-
-        if ($correctAnswer === null) {
-            LoggingService::logSecurityEvent(
-                'expired_captcha_attempt',
-                'warning',
-                null,
-                $request,
-                '/login',
-                422,
-                ['email' => $email]
-            );
-
-            throw ValidationException::withMessages([
-                'captcha_answer' => 'Security check expired. Please refresh the page.',
-            ]);
-        }
-
-        if ($captchaAnswer != $correctAnswer) {
+        // Validate reCAPTCHA
+        if (!$this->verifyRecaptcha($request->input('g-recaptcha-response'), $request->ip())) {
             LoggingService::logSecurityEvent(
                 'failed_captcha_attempt',
                 'warning',
@@ -134,12 +112,9 @@ class AuthController extends Controller
             );
 
             throw ValidationException::withMessages([
-                'captcha_answer' => 'Incorrect security answer. Please try again.',
+                'g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.',
             ]);
         }
-
-        // Mark CAPTCHA as used
-        \Illuminate\Support\Facades\Cache::forget("captcha:{$captchaId}");
 
         // Find user by email
         $user = User::where('email', $email)->first();
